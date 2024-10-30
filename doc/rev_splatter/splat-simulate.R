@@ -1,138 +1,8 @@
-#' Splat simulation
-#'
-#' Simulate count data from a fictional single-cell RNA-seq experiment using
-#' the Splat method.
-#'
-#' @param params SplatParams object containing parameters for the simulation.
-#'        See \code{\link{SplatParams}} for details.
-#' @param method which simulation method to use. Options are "single" which
-#'        produces a single population, "groups" which produces distinct groups
-#'        (eg. cell types), or "paths" which selects cells from continuous
-#'        trajectories (eg. differentiation processes).
-#' @param sparsify logical. Whether to automatically convert assays to sparse
-#'        matrices if there will be a size reduction.
-#' @param verbose logical. Whether to print progress messages.
-#' @param ... any additional parameter settings to override what is provided in
-#'        \code{params}.
-#'
-#' @details
-#' Parameters can be set in a variety of ways. If no parameters are provided
-#' the default parameters are used. Any parameters in \code{params} can be
-#' overridden by supplying additional arguments through a call to
-#' \code{\link{setParams}}. This design allows the user flexibility in
-#' how they supply parameters and allows small adjustments without creating a
-#' new \code{SplatParams} object. See examples for a demonstration of how this
-#' can be used.
-#'
-#' The simulation involves the following steps:
-#' \enumerate{
-#'     \item Set up simulation object
-#'     \item Simulate library sizes
-#'     \item Simulate gene means
-#'     \item Simulate groups/paths
-#'     \item Simulate BCV adjusted cell means
-#'     \item Simulate true counts
-#'     \item Simulate dropout
-#'     \item Create final dataset
-#' }
-#'
-#' The final output is a
-#' \code{\link[SingleCellExperiment]{SingleCellExperiment}} object that
-#' contains the simulated counts but also the values for various intermediate
-#' steps. These are stored in the \code{\link{colData}} (for cell specific
-#' information), \code{\link{rowData}} (for gene specific information) or
-#' \code{\link{assays}} (for gene by cell matrices) slots. This additional
-#' information includes:
-#' \describe{
-#'     \item{\code{colData}}{
-#'         \describe{
-#'             \item{Cell}{Unique cell identifier.}
-#'             \item{Group}{The group or path the cell belongs to.}
-#'             \item{ExpLibSize}{The expected library size for that cell.}
-#'             \item{Step (paths only)}{how far along the path each cell is.}
-#'         }
-#'     }
-#'     \item{\code{rowData}}{
-#'         \describe{
-#'             \item{Gene}{Unique gene identifier.}
-#'             \item{BaseGeneMean}{The base expression level for that gene.}
-#'             \item{OutlierFactor}{Expression outlier factor for that gene.
-#'             Values of 1 indicate the gene is not an expression outlier.}
-#'             \item{GeneMean}{Expression level after applying outlier factors.}
-#'             \item{BatchFac[Batch]}{The batch effects factor for each gene for
-#'             a particular batch.}
-#'             \item{DEFac[Group]}{The differential expression factor for each
-#'             gene in a particular group. Values of 1 indicate the gene is not
-#'             differentially expressed.}
-#'             \item{SigmaFac[Path]}{Factor applied to genes that have
-#'             non-linear changes in expression along a path.}
-#'         }
-#'     }
-#'     \item{\code{assays}}{
-#'         \describe{
-#'             \item{BatchCellMeans}{The mean expression of genes in each cell
-#'             after adding batch effects.}
-#'             \item{BaseCellMeans}{The mean expression of genes in each cell
-#'             after any differential expression and adjusted for expected
-#'             library size.}
-#'             \item{BCV}{The Biological Coefficient of Variation for each gene
-#'             in each cell.}
-#'             \item{CellMeans}{The mean expression level of genes in each cell
-#'             adjusted for BCV.}
-#'             \item{TrueCounts}{The simulated counts before dropout.}
-#'             \item{Dropout}{Logical matrix showing which values have been
-#'             dropped in which cells.}
-#'         }
-#'     }
-#' }
-#'
-#' Values that have been added by Splatter are named using \code{UpperCamelCase}
-#' in order to differentiate them from the values added by analysis packages
-#' which typically use \code{underscore_naming}.
-#'
-#' @return SingleCellExperiment object containing the simulated counts and
-#' intermediate values.
-#'
-#' @references
-#' Zappia L, Phipson B, Oshlack A. Splatter: simulation of single-cell RNA
-#' sequencing data. Genome Biology (2017).
-#'
-#' Paper: \url{10.1186/s13059-017-1305-0}
-#'
-#' Code: \url{https://github.com/Oshlack/splatter}
-#'
-#' @seealso
-#' \code{\link{splatSimLibSizes}}, \code{\link{splatSimGeneMeans}},
-#' \code{\link{splatSimBatchEffects}}, \code{\link{splatSimBatchCellMeans}},
-#' \code{\link{splatSimDE}}, \code{\link{splatSimCellMeans}},
-#' \code{\link{splatSimBCVMeans}}, \code{\link{splatSimTrueCounts}},
-#' \code{\link{splatSimDropout}}
-#'
-#' @examples
-#' # Simulation with default parameters
-#' sim <- splatSimulate()
-#'
-#' \donttest{
-#' # Simulation with different number of genes
-#' sim <- splatSimulate(nGenes = 1000)
-#' # Simulation with custom parameters
-#' params <- newSplatParams(nGenes = 100, mean.rate = 0.5)
-#' sim <- splatSimulate(params)
-#' # Simulation with adjusted custom parameters
-#' sim <- splatSimulate(params, mean.rate = 0.6, out.prob = 0.2)
-#' # Simulate groups
-#' sim <- splatSimulate(method = "groups")
-#' # Simulate paths
-#' sim <- splatSimulate(method = "paths")
-#' }
-#'
-#' @importFrom SummarizedExperiment rowData colData colData<- assays
-#' @importFrom SingleCellExperiment SingleCellExperiment
-#' @importFrom methods validObject
-#' @export
 splatSimulate <- function(params = newSplatParams(),
                           method = c("single", "groups", "paths"),
-                          sparsify = TRUE, verbose = TRUE, ...) {
+                          sparsify = TRUE, verbose = TRUE, 
+                          # sampleLabel= NULL, 
+                          cancerCellGroup = NULL, true_param = NULL, ...) {
     checkmate::assertClass(params, "SplatParams")
     method <- match.arg(method)
 
@@ -142,7 +12,6 @@ splatSimulate <- function(params = newSplatParams(),
     params <- setParams(params, ...)
     params <- expandParams(params)
     validObject(params)
-
     # Set random seed
     seed <- getParam(params, "seed")
     # Get the parameters we are going to use
@@ -152,6 +21,12 @@ splatSimulate <- function(params = newSplatParams(),
     batch.cells <- getParam(params, "batchCells")
     nGroups <- getParam(params, "nGroups")
     group.prob <- getParam(params, "group.prob")
+    nSample <- nBatches/2
+    if(is.list(group.prob)){
+      nTime <- length(group.prob)
+    } else{
+      nTime <- 1
+    }
 
     if (nGroups == 1 && method == "groups") {
         warning("nGroups is 1, switching to single mode")
@@ -162,9 +37,12 @@ splatSimulate <- function(params = newSplatParams(),
     if (verbose) {
         message("Creating simulation object...")
     }
+    
     cell.names <- paste0("Cell", seq_len(nCells))
     gene.names <- paste0("Gene", seq_len(nGenes))
     batch.names <- paste0("Batch", seq_len(nBatches))
+    sample.names <- paste0("Sample",seq_len(nSample))
+    time.names <- paste0("Time", seq_len(nTime))
     if (method == "groups") {
         group.names <- paste0("Group", seq_len(nGroups))
     } else if (method == "paths") {
@@ -178,31 +56,86 @@ splatSimulate <- function(params = newSplatParams(),
     rownames(features) <- gene.names
     sim <- SingleCellExperiment(
         rowData = features, colData = cells,
-        metadata = list(Params = params)
+        metadata = list(Params = params, TrueParams = true_param)
     )
-    
+
     # Make batches vector which is the index of param$batchCells repeated
     # params$batchCells[index] times
+
     batches <- lapply(seq_len(nBatches), function(i, b) {
         rep(i, b[i])
     }, b = batch.cells)
     batches <- unlist(batches)
     colData(sim)$Batch <- batch.names[batches]
+    
+    # revise
+    
+    samples <- ifelse(batches <= nSample, batches, batches - nSample)
+    colData(sim)$Sample <- sample.names[samples]
+    times <- ifelse(batches <= nSample, 1, 2)
+    colData(sim)$Time <- time.names[times]
+
    
+    if(nSample > 1){
+      metainfo <- rownames(true_param$theta[[1]])
+      response_info <- data.frame(
+        Sample = sapply(strsplit(metainfo, "_"), `[`, 1),
+        Response = sapply(strsplit(metainfo, "_"), `[`, 2)
+      )
+      colData(sim)$Response <- response_info$Response[match(colData(sim)$Sample, response_info$Sample)]
+    }else{
+      if(all(true_param$gamma == 0)){Response = "Response"}else{Response = "nonResponse"}
+      colData(sim)$Response <- Response
+    }
+    
+    
+
     withr::with_seed(seed, {
         if (method != "single") {
             ######### revise #######
-            nCell.time1 <- sum(batch.cells[1:(nBatches/2)])
-            groups.time1 <- sample(seq_len(nGroups), nCell.time1,
-                             prob = group.prob[[1]],
-                             replace = TRUE
-            )  
-            nCell.time2 <- sum(batch.cells[(nBatches/2+1):nBatches])
-            groups.time2 <- sample(seq_len(nGroups), nCell.time2,
-                                   prob = group.prob[[2]],
-                                   replace = TRUE
-            )   
-            groups <- c(groups.time1, groups.time2)
+          if(nSample > 1){
+            groups.list <- lapply(seq_len(nSample), function(i) {
+              groups.time1 <- sample(seq_len(nGroups), batchCells[i],
+                                     prob = group.prob[[1]][i,],
+                                     replace = TRUE)
+              groups.time2 <- sample(seq_len(nGroups), batchCells[i + nSample],
+                                     prob = group.prob[[2]][i,],
+                                     replace = TRUE)
+              
+              # table(groups.time2)/sum(table(groups.time2)) - table(groups.time1)/sum(table(groups.time1))
+              # c(groups.time1, groups.time2)
+              list(t1 = groups.time1, t2= groups.time2)
+            })
+          }else{
+            groups.list <- lapply(seq_len(nSample), function(i) {
+              
+              groups.time1 <- sample(seq_len(nGroups), batchCells[i],
+                                     prob = group.prob[[1]],
+                                     replace = TRUE)
+              groups.time2 <- sample(seq_len(nGroups), batchCells[i + nSample],
+                                     prob = group.prob[[2]],
+                                     replace = TRUE)
+              
+              # table(groups.time2)/sum(table(groups.time2)) - table(groups.time1)/sum(table(groups.time1))
+              # c(groups.time1, groups.time2)
+              list(t1 = groups.time1, t2= groups.time2)
+            })
+          }
+
+          groups <- c(do.call(c, lapply(groups.list, function(x) x$t1)), do.call(c, lapply(groups.list, function(x) x$t2)))
+          
+          # groups <- do.call(c, groups.list)
+            # nCell.time1 <- sum(batch.cells[1:(nBatches/2)])
+            # groups.time1 <- sample(seq_len(nGroups), nCell.time1,
+            #                  prob = group.prob[[1]],
+            #                  replace = TRUE
+            # )  
+            # nCell.time2 <- sum(batch.cells[(nBatches/2+1):nBatches])
+            # groups.time2 <- sample(seq_len(nGroups), nCell.time2,
+            #                        prob = group.prob[[2]],
+            #                        replace = TRUE
+            # )   
+            
             ######### end ##########
             # groups <- sample(seq_len(nGroups), nCells,
             #     prob = group.prob,
@@ -226,7 +159,7 @@ splatSimulate <- function(params = newSplatParams(),
             if (verbose) {
                 message("Simulating batch effects...")
             }
-            sim <- splatSimBatchEffects(sim, params)
+            sim <- splatSimBatchEffects(sim, params, nSample)
         }
         sim <- splatSimBatchCellMeans(sim, params)
         if (method == "single") {
@@ -235,11 +168,11 @@ splatSimulate <- function(params = newSplatParams(),
             if (verbose) {
                 message("Simulating group DE...")
             }
-            sim <- splatSimGroupDE(sim, params)
+            sim <- splatSimGroupDE(sim, params, cancerCellGroup, cancerCell.facLoc, cancerCell.facScale)
             if (verbose) {
                 message("Simulating cell means...")
             }
-            sim <- splatSimGroupCellMeans(sim, params)
+            sim <- splatSimGroupCellMeans(sim, params, cancerCellGroup)
         } else {
             if (verbose) {
                 message("Simulating path endpoints...")
@@ -274,10 +207,12 @@ splatSimulate <- function(params = newSplatParams(),
             verbose = verbose
         )
     }
-
+    
+    # sim$Sample <- sim$Batch
     if (verbose) {
         message("Done!")
     }
+
     return(sim)
 }
 
@@ -335,6 +270,7 @@ splatSimulatePaths <- function(params = newSplatParams(), verbose = TRUE, ...) {
 #'
 #' @keywords internal
 splatSimLibSizes <- function(sim, params) {
+
     nCells <- length(colData(sim)$Cell) # splatPop: different nCells per sample
     lib.loc <- getParam(params, "lib.loc")
     lib.scale <- getParam(params, "lib.scale")
@@ -381,6 +317,7 @@ splatSimGeneMeans <- function(sim, params) {
     out.facScale <- getParam(params, "out.facScale")
 
     # Simulate base gene means
+
     base.means.gene <- rgamma(nGenes, shape = mean.shape, rate = mean.rate)
 
     # Add expression outliers
@@ -414,7 +351,7 @@ splatSimGeneMeans <- function(sim, params) {
 #' @importFrom SummarizedExperiment rowData rowData<-
 #'
 #' @keywords internal
-splatSimBatchEffects <- function(sim, params) {
+splatSimBatchEffects <- function(sim, params, nSample) {
     nGenes <- getParam(params, "nGenes")
     nBatches <- getParam(params, "nBatches")
     batch.facLoc <- getParam(params, "batch.facLoc")
@@ -422,17 +359,34 @@ splatSimBatchEffects <- function(sim, params) {
     batch.rmEffect <- getParam(params, "batch.rmEffect")
     means.gene <- rowData(sim)$GeneMean
 
-    for (idx in seq_len(nBatches)) {
+    ####### revise ############
+    sample.facLoc <- batch.facLoc[1:nSample]
+    sample.facScale <- batch.facScale[1:nSample]
+    for (idx in seq_len(nSample)) {
         batch.facs <- getLNormFactors(
-            nGenes, 1, 0.5, batch.facLoc[idx], batch.facScale[idx]
+            nGenes, 1, 0.5, sample.facLoc[idx], sample.facScale[idx]
         )
-
         if (batch.rmEffect) {
             batch.facs <- rep(1, length(batch.facs))
         }
 
         rowData(sim)[[paste0("BatchFacBatch", idx)]] <- batch.facs
+        rowData(sim)[[paste0("BatchFacBatch", (idx + nSample))]] <- batch.facs
     }
+
+  # for (idx in seq_len(nBatches)) {
+  #   batch.facs <- getLNormFactors(
+  #     nGenes, 1, 0.5, batch.facLoc[idx], batch.facScale[idx]
+  #   )
+  #   browser()
+  #   if (batch.rmEffect) {
+  #     batch.facs <- rep(1, length(batch.facs))
+  #   }
+  # 
+  #   rowData(sim)[[paste0("BatchFacBatch", idx)]] <- batch.facs
+  # }
+
+
 
     return(sim)
 }
@@ -455,7 +409,7 @@ splatSimBatchCellMeans <- function(sim, params) {
     cell.names <- colData(sim)$Cell
     gene.names <- rowData(sim)$Gene
     gene.means <- rowData(sim)$GeneMean
-
+    
     if (nBatches > 1) {
         batches <- colData(sim)$Batch
         batch.names <- unique(batches)
@@ -500,27 +454,76 @@ NULL
 
 #' @rdname splatSimDE
 #' @importFrom SummarizedExperiment rowData
-splatSimGroupDE <- function(sim, params) {
+splatSimGroupDE <- function(sim, params, cancerCellGroup, cancerCell.facLoc, cancerCell.facScale) {
     nGenes <- getParam(params, "nGenes")
     nGroups <- getParam(params, "nGroups")
     de.prob <- getParam(params, "de.prob")
     de.downProb <- getParam(params, "de.downProb")
     de.facLoc <- getParam(params, "de.facLoc")
     de.facScale <- getParam(params, "de.facScale")
+    nBatches <- getParam(params, "nBatches")
     means.gene <- rowData(sim)$GeneMean
 
-    for (idx in seq_len(nGroups)) {
-        de.facs <- getLNormFactors(
+    # revise
+    # want to have an option to simulate heterogeneity in one or more groups
+    # as an example, cancer cell
+    # it is done by drawing a random effect for each sample
+    # and add it to the facLoc
+    # that means for this group, every sample has a little bit of different gene definition
+    nSample <- length(unique(sim$Sample))
+    if(!is.null(cancerCellGroup)){
+      # first sample patient heterogeneity based on mean facLoc 
+      
+      sample.effect <- abs(rnorm(nSample, mean = 0, sd = 0.2))
+      # cat(sample.effect, "\n")
+      for (idx in seq_len(nGroups)) {
+        if (idx == cancerCellGroup) {
+          de.facs <- getLNormFactors(
             nGenes,
             de.prob[idx],
             de.downProb[idx],
             de.facLoc[idx],
             de.facScale[idx]
+          )
+          for (sample_idx in seq_along(sample.effect)) {
+            # Extract the current sample's effect
+            current_sample_effect <- sample.effect[sample_idx]
+            adjusted_facs <- ifelse(de.facs == 1, 
+                                    1,  # No DE, so no change
+                                    ifelse(de.facs < 1,
+                                           pmax(0.01, de.facs * (1 - current_sample_effect)), 
+                                           pmax(1.01, de.facs * (1 + current_sample_effect))))
+              # Store the result in rowData, with group and sample labels
+              rowData(sim)[[paste0("DEFacGroup", idx, "_Sample", sample_idx)]] <- adjusted_facs
+            }
+        } else {
+          # For all other groups, calculate without sample effect
+          de.facs <- getLNormFactors(
+            nGenes,
+            de.prob[idx],
+            de.downProb[idx],
+            de.facLoc[idx],
+            de.facScale[idx]
+          )
+          # Apply the DE factors to the group means
+          group.means.gene <- means.gene * de.facs
+          rowData(sim)[[paste0("DEFacGroup", idx)]] <- de.facs
+        }
+      }
+
+    } else{
+      for (idx in seq_len(nGroups)) {
+        de.facs <- getLNormFactors(
+          nGenes,
+          de.prob[idx],
+          de.downProb[idx],
+          de.facLoc[idx],
+          de.facScale[idx]
         )
         group.means.gene <- means.gene * de.facs
         rowData(sim)[[paste0("DEFacGroup", idx)]] <- de.facs
+      }
     }
-
     return(sim)
 }
 
@@ -597,17 +600,30 @@ splatSimSingleCellMeans <- function(sim, params) {
 
 #' @rdname splatSimCellMeans
 #' @importFrom SummarizedExperiment rowData colData assays assays<-
-splatSimGroupCellMeans <- function(sim, params) {
+splatSimGroupCellMeans <- function(sim, params, cancerCellGroup) {
     nGroups <- getParam(params, "nGroups")
     cell.names <- colData(sim)$Cell
     gene.names <- rowData(sim)$Gene
     groups <- colData(sim)$Group
+    samples <- colData(sim)$Sample
     group.names <- levels(groups)
     exp.lib.sizes <- colData(sim)$ExpLibSize
     batch.means.cell <- assays(sim)$BatchCellMeans
-
-    group.facs.gene <- rowData(sim)[, paste0("DEFac", group.names)]
-    cell.facs.gene <- as.matrix(group.facs.gene[, paste0("DEFac", groups)])
+    nBatches <- getParam(params, "nBatches")
+    
+    if(!is.null(cancerCellGroup)){
+      group.facs.gene <- rowData(sim)[, grep("DEFacGroup", colnames(rowData(sim)))]
+      group.sample <- ifelse(groups %in% paste0("Group", cancerCellGroup), 
+                             paste0("DEFac",groups, "_", samples), 
+                             paste0("DEFac", groups))
+      cell.facs.gene <- as.matrix(group.facs.gene[, group.sample])
+    }else{
+      group.facs.gene <- rowData(sim)[, paste0("DEFac", group.names)]
+      cell.facs.gene <- as.matrix(group.facs.gene[, paste0("DEFac", groups)])
+    }
+    # group.facs.gene <- rowData(sim)[, paste0("DEFac", group.names)]
+    # cell.facs.gene <- as.matrix(group.facs.gene[, paste0("DEFac", groups)])
+    # cell.means.gene <- batch.means.cell * cell.facs.gene
     cell.means.gene <- batch.means.cell * cell.facs.gene
     cell.props.gene <- t(t(cell.means.gene) / colSums(cell.means.gene))
     base.means.cell <- t(t(cell.props.gene) * exp.lib.sizes)
@@ -739,6 +755,7 @@ splatSimBCVMeans <- function(sim, params) {
         warning("'bcv.df' is infinite. This parameter will be ignored.")
         bcv <- (bcv.common + (1 / sqrt(base.means.cell)))
     }
+
     means.cell <- matrix(
         rgamma(
             as.numeric(nGenes) * as.numeric(nCells),
@@ -1012,3 +1029,59 @@ bridge <- function(x = 0, y = 0, N = 5, n = 100, sigma.fac = 0.8) {
     return(BB)
 }
 buildBridges <- Vectorize(bridge, vectorize.args = c("x", "y", "sigma.fac"))
+# 
+# 
+# 
+# if(!is.null(cancerCellGroup)){
+#   # first sample patient heterogeneity based on mean facLoc 
+#   browser()
+#   sample.effect <- abs(rnorm(nSample, mean = cancerCell.facLoc, sd = 0.5))
+#   cat(sample.effect, "\n")
+#   for (idx in seq_len(nGroups)) {
+#     if (idx == cancerCellGroup) {
+#       # For the cancer cell group, include sample effect in the calculation
+#       for (sample_idx in seq_along(sample.effect)) {
+#         # Extract the current sample's effect
+#         current_sample_effect <- sample.effect[sample_idx]
+#         
+#         de.facs <- getLNormFactors(
+#           nGenes,
+#           de.prob[idx],
+#           de.downProb[idx],
+#           de.facLoc[idx],
+#           de.facScale[idx]
+#         )
+#         
+#         group.means.gene <- means.gene * de.facs
+#         
+#         # Store the result in rowData, with group and sample labels
+#         rowData(sim)[[paste0("DEFacGroup", idx, "_Sample", sample_idx)]] <- de.facs
+#       }
+#     } else {
+#       # For all other groups, calculate without sample effect
+#       de.facs <- getLNormFactors(
+#         nGenes,
+#         de.prob[idx],
+#         de.downProb[idx],
+#         de.facLoc[idx],
+#         de.facScale[idx]
+#       )
+#       # Apply the DE factors to the group means
+#       group.means.gene <- means.gene * de.facs
+#       rowData(sim)[[paste0("DEFacGroup", idx)]] <- de.facs
+#     }
+#   }
+#   
+# } else{
+#   for (idx in seq_len(nGroups)) {
+#     de.facs <- getLNormFactors(
+#       nGenes,
+#       de.prob[idx],
+#       de.downProb[idx],
+#       de.facLoc[idx],
+#       de.facScale[idx]
+#     )
+#     group.means.gene <- means.gene * de.facs
+#     rowData(sim)[[paste0("DEFacGroup", idx)]] <- de.facs
+#   }
+# }
