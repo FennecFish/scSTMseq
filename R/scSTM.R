@@ -412,7 +412,8 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
                 verbose=TRUE, reportevery=5,
                 LDAbeta=TRUE, interactions=TRUE,
                 ngroups=1, model=NULL,
-                gamma.prior=c("Pooled", "L1"), sigma.prior=0,
+                gamma.prior=c("Pooled", "L1", "LinearRegression", "LinearMixed"), 
+                sigma.prior=0, enet = 0,
                 kappa.prior=c("L1", "Jeffreys"), control=list(),
                 heldout = FALSE)  {
   #Match Arguments and save the call
@@ -445,7 +446,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
       samples <- data[sample][,1]
   } else {
           samples <- rep("sample_1", N)
-      }
+  }
   
   I <- length(unique(samples)) # number of patients
 
@@ -499,7 +500,14 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   makeTopMatrix <- function(x, data=NULL) {
     #is it a formula?
     if(inherits(x,"formula")) {
-      termobj <- terms(x, data=data)
+      terms <- unlist(strsplit(deparse(x), "\\+"))
+      fixed_effects <- terms[!grepl("\\|", terms)]
+      fixed_effects <- if (length(fixed_effects) > 0) {
+        as.formula(paste(paste(fixed_effects, collapse = " + ")))
+      } else {
+        as.formula("~ 1")  # If there are no fixed effects, return an intercept-only formula
+      }
+      termobj <- terms(fixed_effects, data=data)
       if(attr(termobj, "response")==1) stop("Response variables should not be included in prevalence formula.")
       xmat <- try(Matrix::sparse.model.matrix(termobj,data=data),silent=TRUE)
       if(inherits(xmat,"try-error")) {
@@ -526,7 +534,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
       else return(cbind(1,Matrix::Matrix(x)))
     }
   }
-  
+
   ###
   #Now we parse both sets of covariates
   ###
@@ -590,7 +598,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
                    convergence=list(max.em.its=max.em.its, em.converge.thresh=emtol, 
                                     allow.neg.change=TRUE),
                    covariates=list(X=xmat, betaindex=betaindex, yvarlevels=yvarlevels, formula=prevalence),
-                   gamma=list(mode=match.arg(gamma.prior), prior=NULL, enet=1, ic.k=2,
+                   gamma=list(mode=match.arg(gamma.prior), prior=NULL, enet=enet, ic.k=2,
                    # gamma=list(mode=gamma.prior, prior=NULL, enet=1, ic.k=2,
                               maxits=1000),
                    sigma=list(prior=sigma.prior),

@@ -112,12 +112,13 @@ stm.control <- function(documents, vocab, settings, model=NULL) {
       # new_bound.ss <- suffstats$new_bound
       
       #do the m-step
+
       mu <- opt.mu(lambda=lambda, pi = pi,
                    nsamples = nsamples, mode=settings$gamma$mode,
                    covar=settings$covariates$X, enet=settings$gamma$enet, ic.k=settings$gamma$ic.k,
-                   maxits=settings$gamma$maxits)
+                   maxits=settings$gamma$maxits, settings = settings)
       beta <- opt.beta(beta.ss, beta$kappa, settings)
-    
+
       # sce_aggregated <- aggregateAcrossCells(sce, ids = colData(sce)$Batch)
       # set <- newSeqExpressionSet(counts(sce_aggregated))
       # y <- DGEList(counts=counts(set))
@@ -138,6 +139,7 @@ stm.control <- function(documents, vocab, settings, model=NULL) {
                              pi = alpha, samples = samples,
                              mu=mu$mu, sigprior=settings$sigma$prior)
       } else{
+
           sigma <- opt.sigma(nu=sigma.ss, lambda=lambda, omega = NULL,
                              pi = NULL, samples = samples,
                              mu=mu$mu, sigprior=settings$sigma$prior)
