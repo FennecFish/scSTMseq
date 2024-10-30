@@ -100,13 +100,14 @@ setValidity("SplatParams", function(object) {
 
     # Check group.prob sums to 1
     # revise
-    if (!isTRUE(all.equal(sum(v$group.prob[[1]]), 1))) {
-        checks <- c(checks, "the first group.probs must sum to 1")
-    }
-    
-    if (!isTRUE(all.equal(sum(v$group.prob[[2]]), 1))) {
-        checks <- c(checks, "the second group.probs must sum to 1")
-    }
+    # browser()
+    # if (!isTRUE(all.equal(sum(v$group.prob[[1]]), 1))) {
+    #     checks <- c(checks, "the first group.probs must sum to 1")
+    # }
+    # 
+    # if (!isTRUE(all.equal(sum(v$group.prob[[2]]), 1))) {
+    #     checks <- c(checks, "the second group.probs must sum to 1")
+    # }
     # if (!isTRUE(all.equal(sum(v$group.prob), 1))) {
     #     checks <- c(checks, "group.probs must sum to 1")
     # }
@@ -192,17 +193,36 @@ setMethod("setParam", "SplatParams", function(object, name, value) {
 
     if (name == "group.prob") {
         #### revise ###
+      if(is.null(nrow(value[[1]]))){
         if (!isTRUE(all.equal(sum(value[[1]]), 1))) {
-            warning("first group.prob does not sum to 1 and will be rescaled")
-            value[[1]] <- value[[1]] / sum(value[[1]])
+          warning("first group.prob does not sum to 1 and will be rescaled")
+          value[[1]] <- value[[1]] / sum(value[[1]])
         }
         
         if (!isTRUE(all.equal(sum(value[[2]]), 1))) {
-            warning("second group.prob does not sum to 1 and will be rescaled")
-            value[[2]] <- value[[2]] / sum(value[[2]])
+          warning("second group.prob does not sum to 1 and will be rescaled")
+          value[[2]] <- value[[2]] / sum(value[[2]])
+        }
+      }else{
+        if (!nrow(value[[1]]) == nrow(value[[2]])) stop("The dimensionality of pre- and post- group probability needs to be the same")
+        if (!isTRUE(all.equal(unname(rowSums(value[[1]])), rep(1, nrow(value[[1]]))))) {
+          warning("first group.prob does not sum to 1 and will be rescaled")
+          value[[1]] <- apply(value[[1]], 1, function(x) x / sum(x))
         }
         
-        object <- setParamUnchecked(object, "nGroups", length(value[[1]]))
+        if (!isTRUE(all.equal(unname(rowSums(value[[2]])), rep(1, nrow(value[[1]]))))) {
+          warning("second group.prob does not sum to 1 and will be rescaled")
+          value[[2]] <- apply(value[[2]], 1, function(x) x / sum(x))
+        }
+      }
+
+      if(is.null(nrow(value[[1]]))){
+        nGroup <- length(value[[1]])
+      }else{
+        nGroup <- ncol(value[[1]])
+      }
+
+        object <- setParamUnchecked(object, "nGroups", nGroup)
         ##### finish revise #####
         path.from <- getParam(object, "path.from")
         if (length(path.from) > 1 & length(path.from) != length(value)) {

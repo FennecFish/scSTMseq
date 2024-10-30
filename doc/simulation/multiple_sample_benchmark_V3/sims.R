@@ -271,4 +271,52 @@ for(i in 1:dim(nparam)[1]){
   rm(sims)
 }
 
+files <- list.files(path = "/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
+                    pattern = "^sims.*pos_L4_c5_nsample6\\.rds$")
+file_name <- files[2]
+sims <- readRDS(paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/", file_name))
+sims <- logNormCounts(sims)
+sims <- runPCA(sims)
+# plotPCA(sims, colour_by = "Sample", shape_by = "Group", size = "Time")
+# plotPCA(sims, colour_by = "Sample")
+# plotPCA(sims, colour_by = "Time")
+
+pca_data <- sims@int_colData@listData$reducedDims@listData$PCA %>% as.data.frame()
+pca_data$Sample <- sims$Sample
+pca_data$Group <- sims$Group
+pca_data$Time <- sims$Time
+
+png("res/PCA_splatPop_Sample_Group.png", width = 2500, height = 2000, res = 300)
+ggplot(pca_data, aes(x = PC1, y = PC2, color = Sample, shape = Group)) +
+  geom_point() +
+  labs(title = "PCA Plot Simulating Technical Effects Using SplatPop", 
+       subtitle = "With Sample and Group Effect",
+       x = "PC1", y = "PC2") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1") +
+  theme(
+    plot.title = element_text(size = 18, face = "bold"),  # Title font size
+    axis.title = element_text(size = 14),  # Axis titles font size
+    axis.text = element_text(size = 14),   # Axis text font size
+    legend.title = element_text(size = 14),  # Legend title font size
+    legend.text = element_text(size = 12)    # Legend text font size
+  )
+dev.off()
+
+png("res/PCA_splatter_splatPop_Group.png", width = 2500, height = 2000, res = 300)
+ggplot(pca_data, aes(x = PC1, y = PC2, color = Time, shape = Group)) +
+  geom_point() +
+  labs(title = "PCA Plot Simulating Technical Effects Using SplatPop", 
+       subtitle = "With Group and Time Effect",
+       x = "PC1", y = "PC2") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1") +
+  theme(
+    plot.title = element_text(size = 18, face = "bold"),  # Title font size
+    axis.title = element_text(size = 14),  # Axis titles font size
+    axis.text = element_text(size = 14),   # Axis text font size
+    legend.title = element_text(size = 14),  # Legend title font size
+    legend.text = element_text(size = 12)    # Legend text font size
+  )
+dev.off()
 
