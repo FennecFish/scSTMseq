@@ -3,6 +3,7 @@
 # (1) better option setting
 # (2) returning beta as well as mu, sigma, lambda etc.
 
+library(fastTopics)
 stm.init <- function(documents, settings) {
   
   K <- settings$dim$K

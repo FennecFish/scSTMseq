@@ -143,7 +143,7 @@ estep <- function(documents, beta.index, update.mu, #null allows for intercept o
               #  bound[l] <- Ep_psi - Eq_psi
               if(verbose && l%%ctevery==0) cat(".")
           }
-          
+
           pi.i <- pi.ss[Ni]
           pi[[i]] <- colMeans(do.call(rbind, pi.i)) 
           # omega[i,i] <- omega.i
