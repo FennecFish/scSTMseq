@@ -16,16 +16,27 @@ library(stats)
 library(splatter)
 library(scater)
 library(MASS)
+
+process_scSTM <- function(scSTMobj) {
+    max_indices <- apply(scSTMobj$theta, 1, which.max)
+    colnames(scSTMobj$theta) <- paste0("topic_", 1:ncol(scSTMobj$theta))
+    rownames(scSTMobj$theta) <- colnames(scSTMobj$mu$mu)
+    res_cluster <- colnames(scSTMobj$theta)[max_indices]
+    names(res_cluster) <- rownames(scSTMobj$theta)
+    return(res_cluster)
+}
+
 #@ library(batchelor)
 seed = 123
-### simulation ###
-nsample <- 1
+#### simulation ####
+nsample <- 3
 nCellType <- 5
-de.prob <- runif(nCellType, min = 0.5, max = 1)
-de.facLoc <- runif(nCellType, 2, 2.5)
+de.prob <- runif(nCellType, min = 0.05, max = 0.2)
+group.prob <- c(0.1,0.2,0.3,0,0.4)
+de.facLoc <- runif(nCellType, 0.05, 0.2)
 
-batch.facLoc = runif(nsample, min = 0, max = 0.1)
-batch.facScale = runif(nsample, min = 0, max = 0.1)
+batch.facLoc = runif(nsample, min = 0, max = 0.2)
+batch.facScale = runif(nsample, min = 0, max = 0.2)
 
 batchCells <- rep(300, nsample)
 nGenes <- 600
@@ -41,7 +52,7 @@ group.prob <- de.comp/sum(de.comp)
 params <- newSplatParams()
 params <- setParams(params, group.prob = group.prob,
                     de.prob = de.prob, de.facLoc = de.facLoc,
-                    nGenes = nGenes, seed = seed,
+                    nGenes = nGenes, seed = 1,
                     batchCells=batchCells)
 
 sims <- splatSimulate(params, method = "groups",
@@ -75,10 +86,10 @@ s2$Cell <-paste0(s2$Cell, "_2")
 rownames(colData(s2)) <- s2$Cell
 
 sim_neg_dat <- cbind(s1, s2)
-sim3 <- logNormCounts(sim_neg_dat)
+sim3 <- logNormCounts(sim_pos_dat)
 sim3 <- runPCA(sim3)
-plotPCA(sim3, colour_by = "time")
-
+plotPCA(sim3, colour_by = "Batch")
+saveRDS(sim_neg_dat, file = "data/sim_neg_dat.rds")
 ## positive control
 change.comp <- rep(1/nCellType, nCellType) + c(0.2, -0.15, -0.1, 0.05, 0)
 comp <- change.comp * sum(batchCells)
@@ -103,15 +114,13 @@ s3$Cell <-paste0(s3$Cell, "_2")
 rownames(colData(s3)) <- s3$Cell
 
 sim_pos_dat <- SingleCellExperiment::cbind(s1, s3)
-sims <- sim_pos_dat
+saveRDS(sim_pos_dat, file = "data/sim_pos_dat.rds")
 
-sim3 <- logNormCounts(sims)
-sim3 <- runPCA(sim3)
-plotPCA(sim3, colour_by = "Batch")
 
-sims <- readRDS("data/sims_1716946415_neg_L1_c5.rds")
-sims <- sim_neg_dat
+
+
 ##### QA ######
+sims <- readRDS(file = "data/sim_pos_dat.rds")
 sims <- quickPerCellQC(sims, filter=TRUE)
 
 ### remove genes with count 0 
@@ -126,41 +135,83 @@ p2.chosen <- getTopHVGs(dec.p2, n=500)
 sims <- sims[p2.chosen,]
 
 # # batch effect removal using combat seq
-# library(sva)
-# adjusted_counts <- ComBat_seq(counts(sims), batch=sims$Batch, group=NULL)
-# counts(sims) <- adjusted_counts
-# cat("Batch Effect Removed \n")
+library(sva)
+adjusted_counts <- ComBat_seq(counts(sims), batch=sims$Batch, group=NULL)
+counts(sims) <- adjusted_counts
+cat("Batch Effect Removed \n")
 
-df <- colData(sims) %>%
-  as.data.frame() %>%
-  count(Batch, Group, time) %>%
-  pivot_wider(names_from = time, values_from = n, values_fill = list(n = 0))
-total_1 <- sum(df$`1`)
-total_2 <- sum(df$`2`)
-result <- df %>%
-  mutate(
-    Proportion_1 = `1` / total_1,
-    Proportion_2 = `2` / total_2,
-    Ratio = Proportion_1 / Proportion_2
-  )
+# df <- colData(sims) %>%
+#   as.data.frame() %>%
+#   count(Batch, Group, time) %>%
+#   pivot_wider(names_from = time, values_from = n, values_fill = list(n = 0))
+# total_1 <- sum(df$`1`)
+# total_2 <- sum(df$`2`)
+# result <- df %>%
+#   mutate(
+#     Proportion_1 = `1` / total_1,
+#     Proportion_2 = `2` / total_2,
+#     Ratio = Proportion_1 / Proportion_2
+#   )
 
-nsample <- length(unique(sims$Batch))
-ngroup <- length(unique(sims$Group))
-
-sim1 <- sims
-sim2 <- sims
-sim2$Batch[1:300] <- "Batch2"
+nsample <- length(unique(sce$Sample))
+ngroup <- length(unique(sce$Group))
+# 
+# sim1 <- sims
+# sim2 <- sims
+# sim2$Batch[1:300] <- "Batch2"
 
 r.file <- paste0("R/",list.files("R/"))
 sapply(r.file, source)
 sourceCpp("src/STMCfuns.cpp")
+scSTM.mod <- selectModel_parallel(sce = sce,
+                                  K = length(unique(sce$Group)), 
+                                  prevalence = ~Time, content = ~Time,
+                                  N = 3, ts_runs = 5, random_run = 5,
+                                  max.em.its = 10 , sample = "Sample", emtol=1e-6,
+                                  gc = 5)
 
-scSTM.mod <- selectModel(sce = sims,
-                         K = ngroup, prevalence = ~time, content = NULL,
-                         N = 1, ts_runs = 1, random_run = 1,
-                         max.em.its = 5) #, sample = "Batch",)
+scSTM.mod <- selectModel(sce = sce,
+                                  K = length(unique(sce$Group)), 
+                                  prevalence = ~Time, content = ~Time,
+                                  N = 1, ts_runs = 1, random_run = 1,
+                                  max.em.its = 10 , sample = "Sample", emtol=1e-6)
 
-res <- scSTMseq(sce = sims,
+res.alt <- scSTMseq(sce = sims,
+                    K = ngroup, prevalence = ~time, content = ~Batch,
+                    sample = "Batch",
+                    init.type= "TopicScore",
+                    gamma.prior= "Pooled",
+                    kappa.prior= "L1",
+                    control = list(gamma.maxits=3000),
+                    emtol=1e-6,
+                    max.em.its = 100, seed = 1)
+adjustedRandIndex(sims$Group, process_scSTM(res.alt)) 
+plot(res.alt$convergence$bound)
+# sim3$est_cluster <- process_scSTM(res.alt)
+# plotPCA(sim3, colour_by = "est_cluster")
+# clustering for fastTOpics
+set.seed(1)
+nmf.sims <- fastTopics::fit_topic_model(t(counts(sims)),
+                                        k = ngroup,
+                                        init.method = "topicscore",
+                                        verbose = "progressbar",
+                                        numiter.main = 10,
+                                        numiter.refine = 10)
+
+max_indices <- apply(nmf.sims$L, 1, which.max)
+fastTopics_cluster <- colnames(nmf.sims$L)[max_indices]
+names(fastTopics_cluster) <- rownames(nmf.sims$L)
+ft.adjr <- adjustedRandIndex(sims$Group, fastTopics_cluster[match(sims$Cell, names(fastTopics_cluster))]) 
+ft.adjr
+
+scSTM.mod <- selectModel_parallel(sce = sce,
+                         K = ngroup, prevalence = ~Time, content = ~Time,
+                         N = 3, ts_runs = 5, random_run = 5,
+                         max.em.its = 10 , sample = "Sample", emtol=1e-6)
+res <- scSTM.mod$runout[[3]]
+adjustedRandIndex(sims$Group, process_scSTM(res)) 
+
+res.alt <- scSTMseq(sce = sims,
                  K = ngroup, prevalence = ~time, content = NULL,
                  sample = "Batch",
                  init.type= "TopicScore",
@@ -168,7 +219,19 @@ res <- scSTMseq(sce = sims,
                  kappa.prior= "L1",
                  control = list(gamma.maxits=3000),
                  emtol=1e-5,
-                 seed = 105, max.em.its = 100)
+                 seed = 1, max.em.its = 100)
+res.null <- scSTMseq(sce = sims,
+                    K = ngroup, prevalence = NULL, content = NULL,
+                    sample = "Batch",
+                    init.type= "TopicScore",
+                    gamma.prior= "Pooled",
+                    kappa.prior= "L1",
+                    control = list(gamma.maxits=3000),
+                    emtol=1e-6,
+                    seed = 1, max.em.its = 100)
+# fit a linear model
+
+#test <- lm(res$mu$mu[1,]~res$settings$covariates$X[,-1])
 plot(res$convergence$bound)
 
 # res.r <- scSTMseq(sce = sims,
@@ -190,10 +253,10 @@ res.null <- scSTMseq(sce = sims,
                  kappa.prior= "L1",
                  control = list(gamma.maxits=3000),
                  emtol=1e-5,
-                 seed = 105)
+                 seed = 1)
 plot(res.null$convergence$bound)
 
-L1 <- res$convergence$bound[length(res$convergence$bound)]
+L1 <- res.alt$convergence$bound[length(res.alt$convergence$bound)]
 L2 <- res.null$convergence$bound[length(res.null$convergence$bound)]
 s <- -2*(L2-L1)
 
