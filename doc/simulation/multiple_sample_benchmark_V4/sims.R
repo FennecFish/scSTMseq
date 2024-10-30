@@ -1,4 +1,7 @@
-# this script is to generate simulated data for figure 1
+# Goal: This script is to generate multiple patient simulation
+# the sample variation is from batch effect using Splatter
+# each patient has two batches, representing the paired timepoints
+# there is also batch effect among patients
 setwd("/proj/milovelab/wu/scLDAseq")
 library(Matrix)
 library(dplyr)
@@ -17,8 +20,13 @@ seed <- as.integer(Sys.time() + sim_index * runif(1, 2,10))
 r.file <- paste0("doc/rev_splatter/",list.files("doc/rev_splatter/"))
 sapply(r.file, source)
 
-sims_scRNA <- function(nsample, nCellType, de.prob, 
-                       de.facLoc, seed, batch.facLoc, similarity.scale){
+################################################################################
+# first start with small sample difference
+# while the majority of the variation should come from cell type and treatment
+# we use regular spat
+sims_scRNA <- function(nsample, sampleSize, nGenes, nCellType, de.prob, 
+                       de.facLoc, sample.facLoc, trt.facLoc, 
+                       seed){
   
   first.prob <- rep(1/nCellType, nCellType)
   neg.prob <- rep(1/nCellType, nCellType)
@@ -34,70 +42,30 @@ sims_scRNA <- function(nsample, nCellType, de.prob,
                                -0.04, 0)
   }
   
-  nGenes <- 1000
+  nGenes <- nGenes
   de.facScale = 0.1
   
-  batchCells <- c(100, 100, 100, 100)
-  batch.size = nsample
-  batch.facScale = 0.1
+  # we use batch as samples
+  batchCells <- rep(sampleSize, nsample*2)
+  batch.facLoc = rep(c(sample.facLoc, trt.facLoc), each = nsample)
   
-  params.neg <- newSplatPopParams(
-    similarity.scale = similarity.scale,
-    # number of genes
-    nGenes = nGenes,
-    # number of cells & time info
-    batchCells = batchCells,
-    batch.size = batch.size,
-    batch.facLoc = c(0.2,0.2, 0.5,0.5),
-    batch.facScale = batch.facScale,
-    
-    # group prob
-    group.prob = list(first.prob,neg.prob, first.prob,neg.prob),
-    de.prob = de.prob,
-    de.facLoc = de.facLoc,
-    de.facScale = de.facScale,
-    
-    seed = seed
-  )
+  params <- newSplatParams()
+  params <- setParams(params, nGenes = nGenes,
+                      group.prob = list(first.prob, pos.prob),
+                      de.prob = de.prob, de.facLoc = de.facLoc,
+                      batch.facLoc = batch.facLoc, batchCells=batchCells,
+                      seed = seed)
+  sims <- splatSimulate(params, method = "groups",
+                        verbose = TRUE, batch.rmEffect = FALSE)
   
-  sim.neg <- splatPopSimulate(
-    vcf = vcf,
-    gff = gff,
-    params = params.neg,
-    sparsify = T,
-    verbose = T
-  )
-  sim.neg$Time <- gsub("Batch", "Time", sim.neg$Batch)
-  # table(sim.neg$Sample, sim.neg$Batch)
-  params.pos <- newSplatPopParams(
-    similarity.scale = similarity.scale,
-    # number of genes
-    nGenes = nGenes,
-    # number of cells & time info
-    batchCells = batchCells,
-    batch.size = batch.size,
-    batch.facLoc = batch.facLoc,
-    batch.facScale = batch.facScale,
-    
-    # group prob
-    group.prob = list(first.prob,pos.prob),
-    de.prob = de.prob,
-    de.facLoc = de.facLoc,
-    de.facScale = de.facScale,
-    
-    seed = seed
-  )
+  sims$Time <- ifelse(sims$Batch %in% paste0("Batch", 1:nsample),
+                      "Time1", "Time2")
+  sim.sample.number <- as.numeric(sub("Batch", "", sims$Batch))
+  sim.sample.number <- ifelse(sim.sample.number > nsample,
+                              sim.sample.number - nsample, sim.sample.number)
+  sims$Sample <- paste0("Sample", sim.sample.number)
   
-  sim.pos <- splatPopSimulate(
-    vcf = vcf,
-    gff = gff,
-    params = params.pos,
-    sparsify = T,
-    verbose = F
-  )
-  sim.pos$Time <- gsub("Batch", "Time", sim.pos$Batch)
-  # return(sim.pos)
-  return(list(sim.neg, sim.pos))
+  return(sims)
   # df <- colData(s) %>% 
   #   as.data.frame() %>% 
   #   count(Batch, Group, time) %>%
@@ -112,6 +80,12 @@ sims_scRNA <- function(nsample, nCellType, de.prob,
   #   )
 }
 
+# sims <- logNormCounts(sims)
+# sims <- runPCA(sims)
+# plotPCA(sims, colour_by = "Group")
+# plotPCA(sims, colour_by = "Sample")
+# plotPCA(sims, colour_by = "Time")
+
 nsample <- c(3, 6, 12)
 nCellType <- c(5, 9, 13)
 
@@ -122,154 +96,99 @@ for(i in 1:dim(nparam)[1]){
   
   nsample <- nparam[i,1]
   nCellType <- nparam[i,2]
-  
-  vcf <- mockVCF(n.samples = nsample)
-  gff <- mockGFF(n.genes = 1000)
-  
-  # #### level 1 ####
-  # # cell Type  variaiton dominates
-  # de.prob <- 0.5
-  # de.facLoc <- 1
-  # batch.facLoc <- 0.01
-  # similarity.scale <- 10
-  # sims <- sims_scRNA(nsample, nCellType, de.prob, de.facLoc, seed, batch.facLoc, similarity.scale)
-  # 
-  # # prop.table(table(sims[[2]]$Group,sims[[2]]$Sample, sims[[2]]$Batch),
-  # #            margin = c(2, 3))
-  sims <- logNormCounts(sims)
-  sims <- runPCA(sims,ncomponents = 10)
-  plotPCA(sims, colour_by = "Group", shape_by = "Time")
-  plotPCA(sims, colour_by = "Sample", shape_by = "Time")
-  plotPCA(sims, colour_by = "Group", shape_by = "Sample")
-  #
-  # saveRDS(sims[[1]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-  #                                  "sims_", seed, "_neg_L1_c", nCellType, "_nsample", nsample, ".rds"))
-  # cat("Generation Completed for L1-neg.\n")
-  # saveRDS(sims[[2]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-  #                                  "sims_", seed, "_pos_L1_c", nCellType, "_nsample", nsample, ".rds"))
-  # cat("Generation Completed for L1-pos.\n")
-  # rm(sims)
-  # 
-  # #### level 2 ####
-  # # same setting with increased sample variation
-  # de.prob <- 0.5
-  # de.facLoc <- 1
-  # batch.facLoc <- 0.01
-  # similarity.scale <- 6
-  # sims <- sims_scRNA(nsample, nCellType, de.prob, de.facLoc, seed, batch.facLoc, similarity.scale)
-  # 
-  # # prop.table(table(sims$Group,sims$Sample, sims$Batch),
-  # #            margin = c(2, 3))
-  # # sims <- logNormCounts(sims[[1]])
-  # # sims <- runPCA(sims,ncomponents = 10)
-  # # plotPCA(sims, colour_by = "Group", shape_by = "Sample")
-  # # plotPCA(sims, colour_by = "Group", shape_by = "Time")
-  # 
-  # saveRDS(sims[[1]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-  #                                  "sims_", seed, "_neg_L2_c", nCellType, "_nsample", nsample, ".rds"))
-  # cat("Generation Completed for L2-neg.\n")
-  # saveRDS(sims[[2]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-  #                                  "sims_", seed, "_pos_L2_c", nCellType, "_nsample", nsample, ".rds"))
-  # cat("Generation Completed for L2-pos.\n")
-  # rm(sims)
-  # 
-  # #### level 3 ####
-  # # Sample variation dominant compared to group and treatment, increased treatment difference
-  # de.prob <- 0.5
-  # de.facLoc <- 1
-  # batch.facLoc <- 0.01
-  # similarity.scale <- 2
-  # sims <- sims_scRNA(nsample, nCellType, de.prob, de.facLoc, seed, batch.facLoc, similarity.scale)
-  # 
-  # # prop.table(table(sims[[2]]$Group,sims[[2]]$Sample, sims[[2]]$Batch),
-  # # #            margin = c(2, 3))
-  # # sims <- logNormCounts(sims)
-  # # sims <- runPCA(sims,ncomponents = 10)
-  # # plotPCA(sims, colour_by = "Group", shape_by = "Sample")
-  # # plotPCA(sims, colour_by = "Sample", shape_by = "Time")
-  # 
-  # saveRDS(sims[[1]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-  #                                  "sims_", seed, "_neg_L3_c", nCellType, "_nsample", nsample, ".rds"))
-  # cat("Generation Completed for L3-neg.\n")
-  # saveRDS(sims[[2]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-  #                                  "sims_", seed, "_pos_L3_c", nCellType, "_nsample", nsample, ".rds"))
-  # cat("Generation Completed for L3-pos.\n")
-  # rm(sims)
-  
-  #### level 4 ####
-  # both Sample variation and treatment variance are stronger than cell type 
-  de.prob <- 0.2
-  de.facLoc <- 0.5
-  batch.facLoc <- 0.1
-  similarity.scale <- 6
-  sims <- sims_scRNA(nsample, nCellType, de.prob, de.facLoc, seed, batch.facLoc, similarity.scale)
-  
-  # sims <- logNormCounts(sims[[1]])
-  # sims <- runPCA(sims,ncomponents = 10)
-  # plotPCA(sims, colour_by = "Sample", shape_by = "Group")
-  # plotPCA(sims, colour_by = "Time", shape_by = "Group")
-  
-  saveRDS(sims[[1]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-                                   "sims_", seed, "_neg_L4_c", nCellType, "_nsample", nsample, ".rds"))
-  cat("Generation Completed for L4-neg.\n")
-  saveRDS(sims[[2]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-                                   "sims_", seed, "_pos_L4_c", nCellType, "_nsample", nsample, ".rds"))
-  cat("Generation Completed for L4-pos.\n")
+  nGenes <- 1000
+  sampleSize <- 300
+
+  #################################### level 1 ########################################
+  ## cell Type  variation dominates
+  de.prob <- 0.3
+  de.facLoc <- 1
+  sample.facLoc <- 0.1
+  trt.facLoc <- 0.1
+  sims <- sims_scRNA(nsample, sampleSize, nGenes, nCellType, de.prob, 
+                     de.facLoc, sample.facLoc, trt.facLoc, 
+                     seed)
+
+  saveRDS(sims, file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V4/sims/",
+                                   "sims_", seed, "_pos_L1_c", nCellType, "_nsample", nsample, ".rds"))
+  cat("Generation Completed for L1\n")
   rm(sims)
   
-  #### level 5 ####
-  # treatment factors in a very strong variation
-  de.prob <- 0.2
-  de.facLoc <- 0.5
-  batch.facLoc <- 1
-  similarity.scale <- 6
-  sims <- sims_scRNA(nsample, nCellType, de.prob, de.facLoc, seed, batch.facLoc, similarity.scale)
+  #################################### level 2 ########################################
+  ## large cell type variation, and increased sample batch effect
+  de.prob <- 0.3
+  de.facLoc <- 1
+  sample.facLoc <- 0.5
+  trt.facLoc <- 0.1
+  sims <- sims_scRNA(nsample, sampleSize, nGenes, nCellType, de.prob, 
+                     de.facLoc, sample.facLoc, trt.facLoc, 
+                     seed)
   
-  # sims <- logNormCounts(sims)
-  # umap <- calculateUMAP(sims)
-  # umap$Sample <- sims$Sample
-  # umap$Time <- sims$Time
-  # umap$Group <- sims$Group
-  # 
-  # sims <- runPCA(sims,ncomponents = 10)
-  # plotPCA(sims, colour_by = "Time", shape_by = "Group")
-  # plotPCA(sims, colour_by = "Sample", shape_by = "Time")
-  # 
-  
-  saveRDS(sims[[1]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-                                   "sims_", seed, "_neg_L5_c", nCellType, "_nsample", nsample, ".rds"))
-  cat("Generation Completed for L5-neg.\n")
-  saveRDS(sims[[2]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-                                   "sims_", seed, "_pos_L5_c", nCellType, "_nsample", nsample, ".rds"))
-  cat("Generation Completed for L5-pos.\n")
+  saveRDS(sims, file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V4/sims/",
+                              "sims_", seed, "_pos_L2_c", nCellType, "_nsample", nsample, ".rds"))
+  cat("Generation Completed for L2\n")
   rm(sims)
   
-  #### level 6 ####
-  # treatment factors in a very strong variation
-  de.prob <- 0.2
+  #################################### level 3 ########################################
+  ## large cell type variation, with increased treatment and sample effect
+  de.prob <- 0.3
+  de.facLoc <- 1
+  sample.facLoc <- 0.5
+  trt.facLoc <- 0.3
+  sims <- sims_scRNA(nsample, sampleSize, nGenes, nCellType, de.prob, 
+                     de.facLoc, sample.facLoc, trt.facLoc, 
+                     seed)
+  
+  saveRDS(sims, file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V4/sims/",
+                              "sims_", seed, "_pos_L3_c", nCellType, "_nsample", nsample, ".rds"))
+  cat("Generation Completed for L3 \n")
+  rm(sims)
+  
+  #################################### level 4 ########################################
+  ## smaller cell type variation, with increased treatment and sample effect
+  de.prob <- 0.3
   de.facLoc <- 0.5
-  batch.facLoc <- 2
-  similarity.scale <- 6
-  sims <- sims_scRNA(nsample, nCellType, de.prob, de.facLoc, seed, batch.facLoc, similarity.scale)
+  sample.facLoc <- 0.5
+  trt.facLoc <- 0.3
+  sims <- sims_scRNA(nsample, sampleSize, nGenes, nCellType, de.prob, 
+                     de.facLoc, sample.facLoc, trt.facLoc, 
+                     seed)
   
-  # sims <- logNormCounts(sims)
-  # umap <- calculateUMAP(sims)
-  # umap$Sample <- sims$Sample
-  # umap$Time <- sims$Time
-  # umap$Group <- sims$Group
-  # 
-  # sims <- runPCA(sims,ncomponents = 10)
-  # plotPCA(sims, colour_by = "Time", shape_by = "Group")
-  # plotPCA(sims, colour_by = "Sample", shape_by = "Time")
-  # 
-  
-  saveRDS(sims[[1]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-                                   "sims_", seed, "_neg_L6_c", nCellType, "_nsample", nsample, ".rds"))
-  cat("Generation Completed for L5-neg.\n")
-  saveRDS(sims[[2]], file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V3/sims/",
-                                   "sims_", seed, "_pos_L6_c", nCellType, "_nsample", nsample, ".rds"))
-  cat("Generation Completed for L6-pos.\n")
+  saveRDS(sims, file = paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V4/sims/",
+                              "sims_", seed, "_pos_L4_c", nCellType, "_nsample", nsample, ".rds"))
+  cat("Generation Completed for L4 \n")
   rm(sims)
 }
 
 
+
+############### code to fix issue in the current simulation ######
+files <- list.files(path = "/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V4/sims/", pattern = "sims*")
+
+safe_readRDS <- function(file_path) {
+  tryCatch({
+    # Attempt to read the RDS file
+    data <- readRDS(file_path)
+    return(data)
+  }, error = function(e) {
+    # Handle the error
+    message(paste("Error reading RDS file:", file_path))
+    message("Skipping to the next file.")
+    return(NULL)  # Return NULL if an error occurs
+  })
+}
+
+for(file_name in files){
+  dat <- data.frame()
+  file_path <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V4/sims/", file_name)
+  sims <- safe_readRDS(file_path)
+  
+  set_level <- sub("sims_([^.]*)\\.rds", "\\1",  file_name)
+  nsample <- as.numeric(str_extract(set_level, "(?<=nsample)\\d+"))
+  sim.sample.number <- as.numeric(sub("Batch", "", sims$Batch))
+  sim.sample.number <- ifelse(sim.sample.number > nsample,
+                              sim.sample.number - nsample, sim.sample.number)
+  sims$Sample <- paste0("Sample", sim.sample.number)
+  saveRDS(sims, file_path)
+  cat(file_name, "\n")
+}

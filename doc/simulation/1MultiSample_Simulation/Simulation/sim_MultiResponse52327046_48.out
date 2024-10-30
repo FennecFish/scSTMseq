@@ -1,0 +1,48 @@
+        doc/rev_splatter/AllClasses.R doc/rev_splatter/AllGenerics.R
+value   classGeneratorFunction,1      "expandParams"                
+visible FALSE                         TRUE                          
+        doc/rev_splatter/listSims.R doc/rev_splatter/mock-data.R
+value   ?                           ?                           
+visible FALSE                       FALSE                       
+        doc/rev_splatter/params-functions.R doc/rev_splatter/Params-methods.R
+value   ?                                   "expandParams"                   
+visible FALSE                               FALSE                            
+        doc/rev_splatter/SCE-functions.R doc/rev_splatter/simple-estimate.R
+value   ?                                ?                                 
+visible FALSE                            FALSE                             
+        doc/rev_splatter/simple-simulate.R
+value   ?                                 
+visible FALSE                             
+        doc/rev_splatter/SimpleParams-methods.R
+value   "show"                                 
+visible FALSE                                  
+        doc/rev_splatter/splat-estimate.R doc/rev_splatter/splat-simulate.R
+value   ?                                 ?                                
+visible FALSE                             FALSE                            
+        doc/rev_splatter/SplatParams-methods.R
+value   "expandParams"                        
+visible FALSE                                 
+        doc/rev_splatter/splatPop-estimate.R
+value   ?                                   
+visible FALSE                               
+        doc/rev_splatter/splatPop-simulate.R
+value   ?                                   
+visible FALSE                               
+        doc/rev_splatter/SplatPopParams-methods.R doc/rev_splatter/utils.R
+value   "expandParams"                            ?                       
+visible FALSE                                     FALSE                   
+Cell Type is 5 and the sd is 0 
+Cell Type is 10 and the sd is 0 
+Cell Type is 15 and the sd is 0 
+Cell Type is 5 and the sd is 0.1 
+Cell Type is 10 and the sd is 0.1 
+Cell Type is 15 and the sd is 0.1 
+Cell Type is 5 and the sd is 0.3 
+Cell Type is 10 and the sd is 0.3 
+Cell Type is 15 and the sd is 0.3 
+Cell Type is 5 and the sd is 0.6 
+Cell Type is 10 and the sd is 0.6 
+Cell Type is 15 and the sd is 0.6 
+Cell Type is 5 and the sd is 1 
+Cell Type is 10 and the sd is 1 
+Cell Type is 15 and the sd is 1 
