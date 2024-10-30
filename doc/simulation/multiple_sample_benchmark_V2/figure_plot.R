@@ -16,7 +16,7 @@ dat_long <- dat %>%
 dat_long$nCellType <- factor(dat_long$nCellType, levels = c("c5", "c9", "c13"))
 dat_long$nSample <- factor(dat_long$nSample, levels = c("nsample3", "nsample6", "nsample12"))
 
-#png("res/single_patient_simulation_V2/adjustedRandIndex_single_sample_benchmark_V2_figure.png", width = 2500, height = 2500, res = 300)
+png("res/single_patient_simulation_V2/adjustedRandIndex_single_sample_benchmark_V2_figure.png", width = 2500, height = 2500, res = 300)
 ggplot(dat_long, aes(x = level, y = mean_adjR, color = method, group = method)) +
   geom_line(aes(linetype = line_type)) +
   facet_wrap(~ nSample + nCellType) +
@@ -35,7 +35,7 @@ ggplot(dat_long, aes(x = level, y = mean_adjR, color = method, group = method)) 
     plot.title = element_text(size = 16, face = "bold")
   ) +
   guides(linetype = "none") # Remove linetype from the legend
-#dev.off()
+dev.off()
 
 ggplot(dat_long, aes(x = method, y = mean_adjR)) +
   geom_boxplot() +

@@ -1,0 +1,143 @@
+Loading required package: SingleCellExperiment
+Loading required package: SummarizedExperiment
+Loading required package: MatrixGenerics
+Loading required package: matrixStats
+
+Attaching package: ‘MatrixGenerics’
+
+The following objects are masked from ‘package:matrixStats’:
+
+    colAlls, colAnyNAs, colAnys, colAvgsPerRowSet, colCollapse,
+    colCounts, colCummaxs, colCummins, colCumprods, colCumsums,
+    colDiffs, colIQRDiffs, colIQRs, colLogSumExps, colMadDiffs,
+    colMads, colMaxs, colMeans2, colMedians, colMins, colOrderStats,
+    colProds, colQuantiles, colRanges, colRanks, colSdDiffs, colSds,
+    colSums2, colTabulates, colVarDiffs, colVars, colWeightedMads,
+    colWeightedMeans, colWeightedMedians, colWeightedSds,
+    colWeightedVars, rowAlls, rowAnyNAs, rowAnys, rowAvgsPerColSet,
+    rowCollapse, rowCounts, rowCummaxs, rowCummins, rowCumprods,
+    rowCumsums, rowDiffs, rowIQRDiffs, rowIQRs, rowLogSumExps,
+    rowMadDiffs, rowMads, rowMaxs, rowMeans2, rowMedians, rowMins,
+    rowOrderStats, rowProds, rowQuantiles, rowRanges, rowRanks,
+    rowSdDiffs, rowSds, rowSums2, rowTabulates, rowVarDiffs, rowVars,
+    rowWeightedMads, rowWeightedMeans, rowWeightedMedians,
+    rowWeightedSds, rowWeightedVars
+
+Loading required package: GenomicRanges
+Loading required package: stats4
+Loading required package: BiocGenerics
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, aperm, append, as.data.frame, basename, cbind,
+    colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
+    get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,
+    match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
+    Position, rank, rbind, Reduce, rownames, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which.max, which.min
+
+Loading required package: S4Vectors
+
+Attaching package: ‘S4Vectors’
+
+The following objects are masked from ‘package:Matrix’:
+
+    expand, unname
+
+The following object is masked from ‘package:utils’:
+
+    findMatches
+
+The following objects are masked from ‘package:base’:
+
+    expand.grid, I, unname
+
+Loading required package: IRanges
+Loading required package: GenomeInfoDb
+Loading required package: Biobase
+Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    'browseVignettes()'. To cite Bioconductor, see
+    'citation("Biobase")', and for packages 'citation("pkgname")'.
+
+
+Attaching package: ‘Biobase’
+
+The following object is masked from ‘package:MatrixGenerics’:
+
+    rowMedians
+
+The following objects are masked from ‘package:matrixStats’:
+
+    anyMissing, rowMedians
+
+Loading required package: scuttle
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:Biobase’:
+
+    combine
+
+The following objects are masked from ‘package:GenomicRanges’:
+
+    intersect, setdiff, union
+
+The following object is masked from ‘package:GenomeInfoDb’:
+
+    intersect
+
+The following objects are masked from ‘package:IRanges’:
+
+    collapse, desc, intersect, setdiff, slice, union
+
+The following objects are masked from ‘package:S4Vectors’:
+
+    first, intersect, rename, setdiff, setequal, union
+
+The following objects are masked from ‘package:BiocGenerics’:
+
+    combine, intersect, setdiff, union
+
+The following object is masked from ‘package:matrixStats’:
+
+    count
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+stm v1.3.7 successfully loaded. See ?stm for help. 
+ Papers, resources, and other materials at structuraltopicmodel.com
+Loading required package: foreach
+Loading required package: iterators
+Loading required package: parallel
+
+Attaching package: ‘MASS’
+
+The following object is masked from ‘package:dplyr’:
+
+    select
+
+rm: cannot remove '/work/appscr/r/euphyw/RtmpaeF0IT/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078d1687b9468': Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/Rtmp31HoiI/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078d6126c7ffb': Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/RtmpStDIat/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078d7213172e2'rm: cannot remove '/work/appscr/r/euphyw/Rtmp7IZlB9/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078d228fb9a': Directory not empty
+: Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/RtmpsueEzU/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078ce4a80ab5e': Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/RtmpQLktBD/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078d55be01bfb': Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/RtmpXKVZCJ/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078d36d1263e': Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/RtmpgayIWC/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078d0282168ce': Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/RtmpLl33lh/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078d41dba521d': Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/RtmpbJFmGx/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078cf643c143c': Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/RtmpGwy9Vs/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_1078844520a0c': Directory not empty

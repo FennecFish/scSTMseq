@@ -1,0 +1,7 @@
+# Current Development
+Running scSTM_Content_Batch_Prevalence_Time to see how scSTM perform when use both sampleID and time in Content model. 
+Next step is to run 1) n12 and n6 to benchmark
+# Setup
+Simulation: V3 simulation uses SpatPop and generate batch effect between Timepoints
+scSTM_noContent_Prevalance: Completed. Use it to benchmark with other methods, and build estimateEffect
+

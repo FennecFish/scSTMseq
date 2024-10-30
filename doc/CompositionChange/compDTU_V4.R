@@ -8,37 +8,37 @@ library(SingleCellExperiment)
 library(CompDTUReg)
 library(stats)
 library("gridExtra")
-# files <- list.files(path = "/work/users/e/u/euphyw/scLDAseq/data/simulation/composition_change/V4/scSTM_combat_f_nc/")
-# 
-# all.Y <- vector(mode = "list")
-# for (file_name in files){
-#   scSTMobj <- readRDS(paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/composition_change/V4/scSTM_combat_f_nc/", file_name))
-#   set_level <- sub("scSTM_([^.]*)\\.rds", "\\1",  file_name)
-# 
-#   time <- scSTMobj$settings$covariates$X[,-1]
-#   names(time) <- scSTMobj$DocName
-# 
-#   theta <- scSTMobj$theta
-#   rownames(theta) <- scSTMobj$DocName
-# 
-#   t1 <- theta[match(names(time)[time==1], rownames(theta)),]
-#   t2 <- theta[match(names(time)[time==2], rownames(theta)),]
-# 
-#   names(scSTMobj$sampleID) <- scSTMobj$DocName
-#   sampleID <- unique(scSTMobj$sampleID)
-# 
-#   # the following code is to calculate the composition mean for each patient
-#   res <- data.frame()
-#   for (sample in sampleID){
-#     x1 <- t1[rownames(t1) %in% names(which(scSTMobj$sampleID==sample)),]
-#     x2 <- t2[rownames(t2) %in% names(which(scSTMobj$sampleID==sample)),]
-#     Y <- rbind(colMeans(x1),colMeans(x2))
-#     cat(file_name, "\n")
-#     res <- rbind(res, Y)
-#   }
-#   all.Y[[set_level]] <- res
-# }
-# saveRDS(all.Y, file = "allY_V4_scSTM.rds")
+files <- list.files(path = "/work/users/e/u/euphyw/scLDAseq/data/simulation/composition_change/V4/scSTM_combat_f_nc/")
+
+all.Y <- vector(mode = "list")
+for (file_name in files){
+  scSTMobj <- readRDS(paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/composition_change/V4/scSTM_combat_f_nc/", file_name))
+  set_level <- sub("scSTM_([^.]*)\\.rds", "\\1",  file_name)
+
+  time <- scSTMobj$settings$covariates$X[,-1]
+  names(time) <- scSTMobj$DocName
+
+  theta <- scSTMobj$theta
+  rownames(theta) <- scSTMobj$DocName
+
+  t1 <- theta[match(names(time)[time==1], rownames(theta)),]
+  t2 <- theta[match(names(time)[time==2], rownames(theta)),]
+
+  names(scSTMobj$sampleID) <- scSTMobj$DocName
+  sampleID <- unique(scSTMobj$sampleID)
+
+  # the following code is to calculate the composition mean for each patient
+  res <- data.frame()
+  for (sample in sampleID){
+    x1 <- t1[rownames(t1) %in% names(which(scSTMobj$sampleID==sample)),]
+    x2 <- t2[rownames(t2) %in% names(which(scSTMobj$sampleID==sample)),]
+    Y <- rbind(colMeans(x1),colMeans(x2))
+    cat(file_name, "\n")
+    res <- rbind(res, Y)
+  }
+  all.Y[[set_level]] <- res
+}
+saveRDS(all.Y, file = "allY_V4_scSTM.rds")
 
 all.Y <- readRDS("allY_V4_scSTM.rds")
 power_error_plot <- function(dat, threshold = 0.05,

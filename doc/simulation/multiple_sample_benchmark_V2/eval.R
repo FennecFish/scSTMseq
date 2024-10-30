@@ -49,22 +49,22 @@ for(file_name in files){
   sims <- readRDS(paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/sims/sims_", set_level, ".rds"))
   dat <- colData(sims) %>% data.frame() 
   
-  # # scSTM_nC_P
-  # scSTM_nC_P_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/scSTM_noContent_Prevalance/scSTM_",set_level,".rds")
-  # if(file.exists(scSTM_nC_P_name)){
-  #   scSTM_nC_P <- readRDS(scSTM_nC_P_name)
-  #   scSTM_nC_P_cluster <- process_scSTM(scSTM_nC_P)
-  #   dat$scSTM_nC_P_cluster <- scSTM_nC_P_cluster[match(rownames(dat), names(scSTM_nC_P_cluster))]
-  # } else {dat$scSTM_nC_P_cluster <- NA}
-  # 
-  # # scSTM_C_nP
-  # scSTM_C_P_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/scSTM_Content_noPrevalance/scSTM_",set_level,".rds")
-  # if(file.exists(scSTM_C_P_name)){
-  #   scSTM_C_nP <- readRDS(scSTM_C_P_name)
-  #   scSTM_C_nP_cluster <- process_scSTM(scSTM_C_nP)
-  #   dat$scSTM_C_nP_cluster <- scSTM_C_nP_cluster[match(rownames(dat), names(scSTM_C_nP_cluster))]
-  # } else {dat$scSTM_C_nP_cluster <- NA}
-  # 
+  # scSTM_nC_P
+  scSTM_nC_P_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/scSTM_noContent_Prevalance/scSTM_",set_level,".rds")
+  if(file.exists(scSTM_nC_P_name)){
+    scSTM_nC_P <- readRDS(scSTM_nC_P_name)
+    scSTM_nC_P_cluster <- process_scSTM(scSTM_nC_P)
+    dat$scSTM_nC_P_cluster <- scSTM_nC_P_cluster[match(rownames(dat), names(scSTM_nC_P_cluster))]
+  } else {dat$scSTM_nC_P_cluster <- NA}
+
+  # scSTM_C_nP
+  scSTM_C_P_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/scSTM_Content_noPrevalance/scSTM_",set_level,".rds")
+  if(file.exists(scSTM_C_P_name)){
+    scSTM_C_nP <- readRDS(scSTM_C_P_name)
+    scSTM_C_nP_cluster <- process_scSTM(scSTM_C_nP)
+    dat$scSTM_C_nP_cluster <- scSTM_C_nP_cluster[match(rownames(dat), names(scSTM_C_nP_cluster))]
+  } else {dat$scSTM_C_nP_cluster <- NA}
+
   # scSTM_C_P
   scSTM_C_P_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/scSTM_Content_Prevalance/scSTM_",set_level,".rds")
   if(file.exists(scSTM_C_P_name)){
@@ -85,46 +85,47 @@ for(file_name in files){
     names(fastTopics_cluster) <- rownames(nmf.sims$L)
     dat$fastTopics_cluster <- fastTopics_cluster[match(rownames(dat), names(fastTopics_cluster))]
   } else{ dat$fastTopics_cluster <- NA }
-  # # Seurat
-  # seurat_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/seurat/seurat_", set_level, ".rds")
-  # if(file.exists(seurat_name)){
-  #   seurat.sims <- readRDS(seurat_name)
-  #   smeta <- seurat.sims@meta.data %>% as.data.frame()
-  #   sub_sims <- sims[,rownames(smeta)] # filter by the rows
-  #   seurat.adj <- sapply(smeta[,4:7], function(x) {
-  #     adjustedRandIndex(x, sub_sims$Group)
-  #   })
-  #   # select the resolution that has the highest ARI. When there are multiple, select the first one
-  #   best_res <- names(seurat.adj)[seurat.adj == max(seurat.adj)][1]
-  #   seurat_cluster <- seurat.sims@meta.data %>% as.data.frame() %>% dplyr::select(all_of(best_res))
-  #   dat$seurat_cluster <- seurat_cluster[match(rownames(dat), rownames(seurat_cluster)),]
-  #   rm(sub_sims)
-  # } else{dat$seurat_cluster <- NA}
-  # 
-  # 
-  # # sctransform
-  # sctf_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/sctransform/sctransform_", set_level, ".rds")
-  # if(file.exists(sctf_name)){
-  #   sctf <- readRDS(sctf_name)
-  #   sct_meta <- sctf@meta.data %>% as.data.frame()
-  #   sub_sims <- sims[,rownames(sct_meta)] # filter by the rows
-  #   sctf.adj <- sapply(sct_meta[,6:9], function(x) {
-  #     adjustedRandIndex(x, sub_sims$Group)
-  #   })
-  #   # select the resolution that has the highest ARI. When there are multiple, select the first one
-  #   best_res <- names(sctf.adj)[sctf.adj == max(sctf.adj)][1]
-  #   sctf_cluster <- sctf@meta.data %>% as.data.frame() %>% dplyr::select(all_of(best_res))
-  #   dat$sctransform_cluster <- sctf_cluster[match(rownames(dat), rownames(sctf_cluster)),]
-  #   rm(sub_sims)
-  # }else{dat$sctransform_cluster <- NA}
+  
+  # Seurat
+  seurat_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/seurat/seurat_", set_level, ".rds")
+  if(file.exists(seurat_name)){
+    seurat.sims <- readRDS(seurat_name)
+    smeta <- seurat.sims@meta.data %>% as.data.frame()
+    sub_sims <- sims[,rownames(smeta)] # filter by the rows
+    seurat.adj <- sapply(smeta[,4:7], function(x) {
+      adjustedRandIndex(x, sub_sims$Group)
+    })
+    # select the resolution that has the highest ARI. When there are multiple, select the first one
+    best_res <- names(seurat.adj)[seurat.adj == max(seurat.adj)][1]
+    seurat_cluster <- seurat.sims@meta.data %>% as.data.frame() %>% dplyr::select(all_of(best_res))
+    dat$seurat_cluster <- seurat_cluster[match(rownames(dat), rownames(seurat_cluster)),]
+    rm(sub_sims)
+  } else{dat$seurat_cluster <- NA}
 
-  # # monocle3
-  # monocle_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/monocle3/monocle3_", set_level, ".rds")
-  # if(file.exists(monocle_name)){
-  #   monocle3 <- readRDS(monocle_name)
-  #   dat$monocle3_cluster <- partitions(monocle3)[match(rownames(dat), names(partitions(monocle3)))]
-  # } else {dat$monocle3_cluster <- NA}
-  # 
+
+  # sctransform
+  sctf_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/sctransform/sctransform_", set_level, ".rds")
+  if(file.exists(sctf_name)){
+    sctf <- readRDS(sctf_name)
+    sct_meta <- sctf@meta.data %>% as.data.frame()
+    sub_sims <- sims[,rownames(sct_meta)] # filter by the rows
+    sctf.adj <- sapply(sct_meta[,6:9], function(x) {
+      adjustedRandIndex(x, sub_sims$Group)
+    })
+    # select the resolution that has the highest ARI. When there are multiple, select the first one
+    best_res <- names(sctf.adj)[sctf.adj == max(sctf.adj)][1]
+    sctf_cluster <- sctf@meta.data %>% as.data.frame() %>% dplyr::select(all_of(best_res))
+    dat$sctransform_cluster <- sctf_cluster[match(rownames(dat), rownames(sctf_cluster)),]
+    rm(sub_sims)
+  }else{dat$sctransform_cluster <- NA}
+
+  # monocle3
+  monocle_name <- paste0("/work/users/e/u/euphyw/scLDAseq/data/simulation/multi_sample_benchmark_V2/monocle3/monocle3_", set_level, ".rds")
+  if(file.exists(monocle_name)){
+    monocle3 <- readRDS(monocle_name)
+    dat$monocle3_cluster <- partitions(monocle3)[match(rownames(dat), names(partitions(monocle3)))]
+  } else {dat$monocle3_cluster <- NA}
+
   adjusted_rand_indices <- sapply(dat[, 8:ncol(dat)], function(x) {
     adjustedRandIndex(x, sims$Group)
   })
