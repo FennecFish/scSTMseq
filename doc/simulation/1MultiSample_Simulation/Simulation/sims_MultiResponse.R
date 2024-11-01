@@ -157,14 +157,14 @@ colnames(param_dat) <- c("numCellType", "gamma_sd")
 # #############################################################
 for (i in 1:nrow(param_dat)){
   nCellType <- param_dat[i,1]
-  gamma_sd_tmp <- param_dat[i,2]
+  interaction_effect <- param_dat[i,2]
   simplex <- nCellType- 1 
   mean = matrix(rep(0, simplex*A), nrow = A)
-  sd <- replicate(simplex, diag(gamma_sd_tmp, A), simplify = FALSE)
-  if(gamma_sd_tmp == 0){
+  sd <- replicate(simplex, diag(c(rep(0, A - 1), interaction_effect), A), simplify = FALSE)
+  if(interaction_effect == 0){
     type = "NullModel"
   }else{
-    type = paste0("HighVar", gamma_sd_tmp)
+    type = paste0("HighVar", interaction_effect)
   }
   
   

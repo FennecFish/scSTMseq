@@ -130,3 +130,5 @@ The following object is masked from ‘package:dplyr’:
 
     select
 
+rm: cannot remove '/work/appscr/r/euphyw/RtmpYm7R4w/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_87fdd7924954f': Directory not empty
+rm: cannot remove '/work/appscr/r/euphyw/RtmpaApjWq/sourceCpp-x86_64-pc-linux-gnu-1.0.13/sourcecpp_87f927bcadc12': Directory not empty
