@@ -3,15 +3,15 @@
 #SBATCH --job-name=scSTM_mixed
 #SBATCH --output=scSTM_mixed%A_%a.out
 #SBATCH --error=scSTM_mixed%A_%a.err
-#SBATCH --ntasks=1
+#SBATCH --ntasks=10
 #SBATCH --cpus-per-task=1
 #SBATCH --time=2-
-#SBATCH --mem=20G
-#SBATCH --array=1-235
+#SBATCH --mem=60G
+#SBATCH --array=1-173
 #SBATCH --mail-type=all
 #SBATCH --mail-user=euphyw@live.unc.edu
 
-
+# ran 1-235
 module load r/4.3.1
 
 DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/"

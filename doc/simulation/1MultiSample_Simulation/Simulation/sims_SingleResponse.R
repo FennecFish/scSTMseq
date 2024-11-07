@@ -21,8 +21,9 @@ set.seed(seed)
 # Define parameters
 batch.rmEffect = TRUE
 cancerCellGroup = NULL
-numCellType <- c(5, 10, 15)
-gamma_sd <- c(0, 0.1, 0.3, 0.6, 1)
+# numCellType <- c(5, 10, 15)
+numCellType <- 5
+gamma_sd <- c(0, 0.1, 0.16, 0.23, 0.3, 0.4)
 nSample <- 20
 nTimepoints <- 2
 A = 1 # number of covariates, only 1 to show timeEffect
@@ -178,7 +179,7 @@ for (i in 1:nrow(param_dat)){
   # save_response <- paste(round(ResponseEffect, 1), collapse = ".")
   # save_time <- paste(round(TimeEffect, 1), collapse = ".")
   saveRDS(sims, file = paste0(dir, "nSample", nSample,
-                               "_nCellType", nCellType, "_", save_batch, "_", save_cancer, "/sims/",
+                               "_nCellType", nCellType, "_", save_batch, "_", save_cancer, "/1000sims/",
                                "sims_", seed, "_", type, ".rds"))
   # print(proportion_check(sims))
   # print((true_param$theta$t2-true_param$theta$t1)/true_param$theta$t1)

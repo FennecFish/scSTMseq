@@ -24,8 +24,7 @@ cat(file_name, "\n")
 gc <- as.integer(args[3])
 
 set_level <- sub("^sims_(.*)\\.rds$", "\\1", file_name)
-sims <- readRDS(paste0(dir, "/sims/", file_name))
-sims$Batch_ID <- paste0(sims$Sample, "_", sims$Time)
+sims <- readRDS(paste0(dir, "/1000sims/", file_name))
 # quick qc
 sims <- quickPerCellQC(sims, filter=TRUE)
 
@@ -59,5 +58,5 @@ scSTM.mod <- selectModel_parallel(sce = sims, sample = "Sample",
                                   max.em.its = 100, net.max.em.its = 15, gc = gc)
 
 # msg <- sprintf("Completed scLDAseq (%d seconds). \n", floor((proc.time()-t1)[3]))
-saveRDS(scSTM.mod, file = paste0(dir, "/scSTM_Pooled_noContent_Prevalence_Time/",
+saveRDS(scSTM.mod, file = paste0(dir, "/1000scSTM_Pooled_noContent_Prevalence_Time/",
                                  "scSTM_", set_level, ".rds"))

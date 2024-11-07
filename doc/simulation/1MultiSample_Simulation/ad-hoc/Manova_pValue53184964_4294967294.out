@@ -1,0 +1,1152 @@
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.088    0.09   0.072   0.096   0.110   0.176   0.110   0.129
+2 Time2 20  0.088    0.09   0.067   0.099   0.102   0.181   0.112   0.131
+   Group9  Group10
+1   0.063    0.066
+2   0.062    0.069
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "10.898"       "10" "0.366"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.311
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.727"       "0.751"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.118   0.088   0.067   0.089   0.109   0.086   0.116   0.134
+2 Time2 20  0.114   0.081   0.074   0.094   0.108   0.088   0.112   0.131
+   Group9  Group10
+1   0.115    0.079
+2   0.116    0.082
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "7.555"        "10" "0.672"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.463
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.862"       "0.659"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.101   0.128   0.096    0.08   0.091   0.135   0.123   0.092
+2 Time2 20  0.110   0.128   0.094    0.07   0.097   0.134   0.124   0.083
+   Group9  Group10
+1   0.093     0.06
+2   0.091     0.07
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "20.701"       "10" "0.023"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          2.854
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.319"       "0.046"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.092   0.155   0.094   0.126   0.076   0.082   0.081   0.089
+2 Time2 20  0.091   0.152   0.089   0.124   0.080   0.091   0.081   0.086
+   Group9  Group10
+1   0.127    0.077
+2   0.129    0.077
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "7.656"        "10" "0.662"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.305
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.85"        "0.754"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.104   0.129   0.107   0.107   0.120   0.119   0.071   0.112
+2 Time2 20  0.101   0.128   0.105   0.108   0.121   0.127   0.075   0.111
+   Group9  Group10
+1   0.066    0.064
+2   0.061    0.063
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "3.392"        "10" "0.971"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.154
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.98"        "0.966"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.122   0.088   0.054   0.105   0.124   0.134   0.119   0.093
+2 Time2 20  0.109   0.094   0.052   0.106   0.121   0.137   0.124   0.097
+   Group9  Group10
+1   0.084    0.077
+2   0.093    0.067
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "18.724"       "10" "0.044"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          1.684
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.377"       "0.083"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.095   0.118   0.131   0.091   0.154   0.077   0.089   0.064
+2 Time2 20  0.089   0.128   0.132   0.093   0.155   0.076   0.078   0.071
+   Group9  Group10
+1   0.118    0.062
+2   0.120    0.059
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "29.306"       "10" "0.001"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.618
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.144"       "0.378"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.114   0.079   0.103   0.067   0.096   0.097   0.089   0.157
+2 Time2 20  0.122   0.080   0.112   0.066   0.087   0.098   0.085   0.149
+   Group9  Group10
+1   0.121    0.077
+2   0.118    0.082
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "15.73"        "10" "0.108"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.794
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.47"        "0.473"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.121   0.103   0.082   0.075   0.117   0.090   0.118   0.122
+2 Time2 20  0.126   0.101   0.081   0.073   0.123   0.092   0.119   0.116
+   Group9  Group10
+1   0.103    0.069
+2   0.093    0.075
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "11.801"       "10" "0.299"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.523
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.647"       "0.689"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.106   0.100   0.108   0.106   0.098   0.087   0.092   0.141
+2 Time2 20  0.097   0.097   0.109   0.110   0.104   0.085   0.086   0.144
+   Group9  Group10
+1   0.095    0.067
+2   0.095    0.073
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "10.841"       "10" "0.37" 
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.558
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.702"       "0.32"        
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.136   0.121   0.058   0.096   0.126   0.082   0.121   0.085
+2 Time2 20  0.129   0.120   0.057   0.101   0.117   0.078   0.124   0.090
+   Group9  Group10
+1   0.114    0.060
+2   0.113    0.071
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "8"            "10" "0.629"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time           2.13
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.843"       "0.059"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.081   0.127   0.125   0.108   0.078   0.074   0.126   0.118
+2 Time2 20  0.077   0.115   0.126   0.107   0.087   0.072   0.128   0.110
+   Group9  Group10
+1   0.095    0.068
+2   0.096    0.080
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "15.433"       "10" "0.117"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          1.838
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.468"       "0.155"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.076   0.114   0.082   0.097   0.113   0.104   0.101   0.121
+2 Time2 20  0.068   0.120   0.091   0.095   0.103   0.101   0.099   0.129
+   Group9  Group10
+1   0.133    0.059
+2   0.134    0.060
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "28.302"       "10" "0.002"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.327
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.172"       "0.702"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.131   0.080   0.088   0.066   0.114   0.133   0.125   0.100
+2 Time2 20  0.126   0.079   0.087   0.063   0.119   0.132   0.125   0.106
+   Group9  Group10
+1   0.088    0.075
+2   0.084    0.078
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "7.824"        "10" "0.646"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.223
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.865"       "0.909"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.094   0.078   0.143   0.111   0.091   0.090   0.086   0.128
+2 Time2 20  0.093   0.077   0.139   0.114   0.089   0.094   0.083   0.117
+   Group9  Group10
+1   0.116    0.064
+2   0.121    0.073
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "17.172"       "10" "0.071"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          1.285
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.397"       "0.104"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.088    0.11   0.092   0.117   0.080   0.101   0.082   0.140
+2 Time2 20  0.092    0.11   0.096   0.112   0.071   0.111   0.085   0.139
+   Group9  Group10
+1   0.114    0.075
+2   0.116    0.066
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value 
+Time "32.283"       "10" "<0.001"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          1.288
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.119"       "0.209"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.068   0.103   0.122   0.083   0.133   0.111   0.081   0.113
+2 Time2 20  0.068   0.101   0.115   0.092   0.137   0.118   0.080   0.105
+   Group9  Group10
+1   0.098    0.088
+2   0.099    0.084
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "16.498"       "10" "0.086"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.459
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.462"       "0.68"        
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group8, 
+    Group9, Group10, Group7) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group8  Group9
+1 Time1 20  0.155   0.114   0.112   0.089   0.071   0.096   0.105   0.114
+2 Time2 20  0.151   0.118   0.106   0.098   0.068   0.091   0.105   0.116
+   Group10  Group7
+1    0.079   0.065
+2    0.075   0.072
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "15.445"       "10" "0.117"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.418
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.473"       "0.461"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.127   0.106   0.079   0.063   0.079   0.125   0.111   0.114
+2 Time2 20  0.134   0.109   0.078   0.065   0.076   0.125   0.111   0.111
+   Group9  Group10
+1   0.109    0.086
+2   0.107    0.085
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "3.591"        "10" "0.964"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.113
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.976"       "0.982"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.091   0.122   0.097   0.111   0.088   0.114   0.100   0.106
+2 Time2 20  0.090   0.129   0.101   0.110   0.087   0.113   0.098   0.105
+   Group9  Group10
+1   0.097    0.074
+2   0.097    0.071
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "1.708"        "10" "0.998"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.236
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "1"           "0.935"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.102   0.129   0.108   0.108   0.119   0.119   0.085   0.100
+2 Time2 20  0.105   0.134   0.103   0.112   0.127   0.122   0.075   0.102
+   Group9  Group10
+1   0.056    0.074
+2   0.054    0.066
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value 
+Time "34.609"       "10" "<0.001"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.614
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.105"       "0.237"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.132   0.105   0.105   0.086   0.111   0.066   0.109   0.122
+2 Time2 20  0.128   0.125   0.111   0.088   0.108   0.062   0.112   0.106
+   Group9  Group10
+1   0.100    0.064
+2   0.099    0.060
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value 
+Time "59.305"       "10" "<0.001"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.783
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.021"       "0.359"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.061   0.085   0.147   0.094   0.126   0.099   0.110   0.110
+2 Time2 20  0.071   0.084   0.129   0.100   0.118   0.099   0.113   0.116
+   Group9  Group10
+1   0.098     0.07
+2   0.100     0.07
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "20.268"       "10" "0.027"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.799
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.372"       "0.339"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.115   0.108   0.097   0.115   0.098   0.087   0.084   0.105
+2 Time2 20  0.107   0.119   0.099   0.123   0.093   0.091   0.085   0.099
+   Group9  Group10
+1   0.123    0.070
+2   0.110    0.075
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "16.735"       "10" "0.08" 
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          1.057
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.447"       "0.172"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.102   0.087   0.104   0.107   0.097   0.088   0.134   0.087
+2 Time2 20  0.092   0.087   0.094   0.122   0.101   0.091   0.134   0.092
+   Group9  Group10
+1   0.113    0.080
+2   0.111    0.076
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "16.006"       "10" "0.099"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.676
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.489"       "0.451"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.091   0.097   0.081   0.088   0.109   0.079   0.075   0.171
+2 Time2 20  0.091   0.103   0.080   0.085   0.108   0.088   0.072   0.168
+   Group9  Group10
+1   0.131    0.079
+2   0.123    0.082
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "7.543"        "10" "0.673"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.279
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.845"       "0.845"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.098   0.078   0.080   0.079   0.108   0.127   0.145   0.081
+2 Time2 20  0.101   0.076   0.086   0.086   0.112   0.115   0.150   0.080
+   Group9  Group10
+1   0.120    0.083
+2   0.108    0.084
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "18.523"       "10" "0.047"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.643
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.365"       "0.407"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group6, Group7, Group8, 
+    Group9, Group10, Group5) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group6  Group7  Group8  Group9
+1 Time1 20  0.104   0.088   0.105   0.112   0.097   0.135   0.115   0.068
+2 Time2 20  0.099   0.088   0.106   0.110   0.100   0.135   0.110   0.069
+   Group10  Group5
+1    0.063   0.112
+2    0.062   0.123
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "16.877"       "10" "0.077"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.174
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.444"       "0.93"        
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.107   0.070   0.080   0.108   0.121   0.109   0.134   0.114
+2 Time2 20  0.111   0.072   0.083   0.111   0.114   0.107   0.130   0.120
+   Group9  Group10
+1   0.082    0.075
+2   0.080    0.073
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "4.542"        "10" "0.92" 
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.208
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.967"       "0.953"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.082   0.102   0.077   0.092   0.137   0.063   0.095   0.158
+2 Time2 20  0.085   0.103   0.071   0.096   0.140   0.059   0.100   0.148
+   Group9  Group10
+1   0.128    0.064
+2   0.131    0.069
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "19.169"       "10" "0.038"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.394
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.376"       "0.424"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.098   0.095   0.106   0.105   0.134   0.114   0.085   0.117
+2 Time2 20  0.098   0.084   0.109   0.108   0.132   0.110   0.078   0.122
+   Group9  Group10
+1   0.072    0.075
+2   0.083    0.076
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value 
+Time "33.824"       "10" "<0.001"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.659
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.123"       "0.372"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.101   0.119   0.139   0.103   0.113   0.089   0.076   0.102
+2 Time2 20  0.101   0.117   0.131   0.099   0.105   0.096   0.081   0.103
+   Group9  Group10
+1   0.095    0.062
+2   0.097    0.071
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "22.105"       "10" "0.015"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time           1.35
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.291"       "0.092"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.100   0.106   0.121   0.113   0.067   0.125   0.112   0.102
+2 Time2 20  0.104   0.100   0.116   0.120   0.069   0.119   0.112   0.100
+   Group9  Group10
+1   0.095    0.060
+2   0.093    0.067
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "6.152"        "10" "0.802"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          1.116
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.906"       "0.298"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.100   0.066   0.091   0.083   0.110   0.133   0.087   0.133
+2 Time2 20  0.097   0.068   0.092   0.080   0.118   0.141   0.084   0.137
+   Group9  Group10
+1   0.119    0.076
+2   0.111    0.073
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "14.479"       "10" "0.152"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.266
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.514"       "0.837"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.097   0.082   0.128   0.094   0.094   0.110   0.117   0.097
+2 Time2 20  0.107   0.076   0.124   0.102   0.097   0.103   0.119   0.102
+   Group9  Group10
+1   0.113    0.069
+2   0.107    0.063
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "17.728"       "10" "0.06" 
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          1.135
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.407"       "0.129"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.098   0.126   0.065   0.094   0.093   0.117   0.092   0.121
+2 Time2 20  0.094   0.126   0.064   0.094   0.098   0.118   0.094   0.123
+   Group9  Group10
+1   0.105    0.088
+2   0.099    0.089
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "6.119"        "10" "0.805"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.156
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.914"       "0.984"       
+Call: 
+cbind(Group1, Group2, Group3, Group5, Group6, Group7, Group8, 
+    Group9, Group10, Group4) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group5  Group6  Group7  Group8  Group9
+1 Time1 20  0.171   0.096   0.080   0.061   0.136   0.089   0.095   0.111
+2 Time2 20  0.178   0.091   0.081   0.054   0.139   0.087   0.103   0.109
+   Group10  Group4
+1    0.070   0.091
+2    0.067   0.091
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "6.992"        "10" "0.726"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.385
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.865"       "0.71"        
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.116   0.095   0.097   0.107   0.108   0.085   0.095   0.110
+2 Time2 20  0.116   0.092   0.097   0.099   0.115   0.090   0.092   0.113
+   Group9  Group10
+1   0.120    0.066
+2   0.121    0.065
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "14.644"       "10" "0.146"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.135
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.537"       "0.944"       
+Call: 
+cbind(Group1, Group2, Group3, Group5, Group6, Group7, Group8, 
+    Group9, Group10, Group4) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group5  Group6  Group7  Group8  Group9
+1 Time1 20  0.129   0.119   0.092   0.107   0.091   0.095   0.119   0.074
+2 Time2 20  0.129   0.124   0.087   0.114   0.090   0.096   0.121   0.071
+   Group10  Group4
+1    0.078   0.096
+2    0.075   0.094
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "13.163"       "10" "0.215"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.244
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.603"       "0.839"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.076   0.084   0.129   0.119   0.128   0.095   0.098   0.092
+2 Time2 20  0.085   0.082   0.126   0.122   0.125   0.097   0.099   0.089
+   Group9  Group10
+1   0.096    0.084
+2   0.094    0.081
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "25.774"       "10" "0.004"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.246
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.21"        "0.836"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.111   0.112   0.064   0.073   0.091   0.122   0.132   0.111
+2 Time2 20  0.114   0.112   0.065   0.074   0.088   0.127   0.136   0.106
+   Group9  Group10
+1   0.109    0.075
+2   0.107    0.071
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "3.473"        "10" "0.968"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.287
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.983"       "0.833"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.093   0.136   0.094   0.095   0.102   0.089   0.096   0.102
+2 Time2 20  0.094   0.136   0.098   0.097   0.097   0.081   0.102   0.102
+   Group9  Group10
+1   0.110    0.082
+2   0.117    0.077
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "8.479"        "10" "0.582"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.714
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.804"       "0.506"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.057   0.138   0.072   0.085   0.141   0.099   0.121   0.122
+2 Time2 20  0.061   0.133   0.084   0.086   0.139   0.093   0.114   0.120
+   Group9  Group10
+1   0.097    0.068
+2   0.104    0.068
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "12.035"       "10" "0.283"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.514
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.652"       "0.569"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.106   0.125   0.082   0.097   0.068   0.150   0.093   0.112
+2 Time2 20  0.112   0.121   0.091   0.099   0.071   0.135   0.093   0.111
+   Group9  Group10
+1   0.099    0.068
+2   0.098    0.069
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "16.775"       "10" "0.079"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.422
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.446"       "0.712"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.116   0.109   0.116   0.100    0.12   0.079   0.114   0.087
+2 Time2 20  0.108   0.117   0.111   0.111    0.12   0.072   0.109   0.086
+   Group9  Group10
+1   0.086    0.075
+2   0.084    0.084
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "10.127"       "10" "0.429"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.919
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.719"       "0.129"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.092   0.089   0.148   0.108   0.100     0.1   0.128   0.074
+2 Time2 20  0.091   0.085   0.138   0.115   0.106     0.1   0.124   0.077
+   Group9  Group10
+1    0.09    0.071
+2    0.09    0.074
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "6.977"        "10" "0.728"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.278
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.873"       "0.79"        
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.101   0.136   0.081   0.080   0.101   0.120   0.132   0.126
+2 Time2 20  0.091   0.163   0.084   0.078   0.101   0.111   0.129   0.123
+   Group9  Group10
+1    0.06    0.064
+2    0.06    0.061
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value 
+Time "43.169"       "10" "<0.001"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time           0.59
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.052"       "0.579"       
+Call: 
+cbind(Group1, Group2, Group3, Group4, Group5, Group6, Group7, 
+    Group8, Group9, Group10) ~ Time
+A multivariate repeated measures analysis with  1 within-subject factor(s) ( Time )and  0 between-subject factor(s). 
+
+Descriptive:
+   Time  n Group1  Group2  Group3  Group4  Group5  Group6  Group7  Group8
+1 Time1 20  0.089   0.081   0.111   0.104   0.112   0.118   0.111   0.116
+2 Time2 20  0.098   0.081   0.108   0.102   0.108   0.117   0.112   0.118
+   Group9  Group10
+1   0.088    0.068
+2   0.081    0.074
+
+Wald-Type Statistic (WTS):
+     Test statistic df   p-value
+Time "24.482"       "10" "0.006"
+
+modified ANOVA-Type Statistic (MATS):
+     Test statistic
+Time          0.626
+
+p-values resampling:
+     paramBS (WTS) paramBS (MATS)
+Time "0.232"       "0.418"       

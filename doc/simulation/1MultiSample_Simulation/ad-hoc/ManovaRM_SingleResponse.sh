@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=Manova_Theta_SingleResponse_eval
-#SBATCH --output=Manova_Theta_SingleResponse_eval%A_%a.out
-#SBATCH --error=Manova_Theta_SingleResponse_eval%A_%a.err
+#SBATCH --job-name=Manova1000
+#SBATCH --output=Manova1000%A_%a.out
+#SBATCH --error=Manova1000%A_%a.err
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=8:00:00
-#SBATCH --mem=6G
-#SBATCH --array=1-235
+#SBATCH --time=3:00:00
+#SBATCH --mem=5G
+#SBATCH --array=201-1072
 #SBATCH --mail-type=all
 #SBATCH --mail-user=euphyw@live.unc.edu
 
@@ -15,7 +15,7 @@
 module load r/4.3.1
 
 DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/"
-STM_DIR="scSTM_Pooled_noContent_Prevalence_Time"
+STM_DIR="1000scSTM_Pooled_noContent_Prevalence_Time"
 FILES=($(find "$DIR" -type f -path "*/$STM_DIR/*.rds"))
 
 # Calculate the index for the SLURM array
