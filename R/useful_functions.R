@@ -13,14 +13,18 @@ safe_readRDS <- function(file_path) {
 
 process_scSTM <- function(scSTMobj) {
   if(class(scSTMobj) == "selectModel") {
-    all_values <- unlist(scSTMobj$bound)
-    max_value <- max(all_values, na.rm = T)
-    if(length(which(all_values == max_value)) > 1){
-      max_position_in_vector <- which(all_values == max_value)[1]
-    } else{
-      max_position_in_vector <- which(all_values == max_value)
+    if(length(scSTMobj$bound) == 1){
+      scSTMobj <- scSTMobj$runout
+    }else{
+      all_values <- unlist(scSTMobj$bound)
+      max_value <- max(all_values, na.rm = T)
+      if(length(which(all_values == max_value)) > 1){
+        max_position_in_vector <- which(all_values == max_value)[1]
+      } else{
+        max_position_in_vector <- which(all_values == max_value)
+      }
+      scSTMobj <- scSTMobj$runout[[max_position_in_vector]]
     }
-    scSTMobj <- scSTMobj$runout[[max_position_in_vector]]
   }
   max_indices <- apply(scSTMobj$theta, 1, which.max)
   colnames(scSTMobj$theta) <- paste0("topic_", 1:ncol(scSTMobj$theta))
@@ -86,4 +90,40 @@ OneToOne_Mapping_Topics <- function(scSTMobj){
     slice_max(likelihood, with_ties = FALSE) %>%
     ungroup()
   return(likelihoods)
+}
+
+plot_data_generate <- function(thresholds, pValueList, by_group = NULL){
+  exist.change.list <- lapply(thresholds, function(thr) {
+    res <- pValueList %>%
+      mutate(wts.sig = wts < thr,
+             mats.sig = mats < thr)
+    return(res)
+  })
+  ProportionOfTrue <- data.frame()
+  
+  for (i in seq_along(thresholds)) {
+    threshold <- thresholds[i]
+    if(is.null(by_group)){
+      prop_truth <- exist.change.list[[i]] %>%
+        as.data.frame() %>%
+        summarize(
+          wts_sig_proportion = mean(wts.sig),
+          mats_sig_proportion = mean(mats.sig)
+        ) %>%
+        mutate(Threshold = threshold)
+    }else{
+      # if we want to group the power/ type I error by effect size
+      prop_truth <- exist.change.list[[i]] %>%
+        as.data.frame() %>%
+        group_by(EffectSize) %>%
+        summarize(
+          wts_sig_proportion = mean(wts.sig),
+          mats_sig_proportion = mean(mats.sig)
+        ) %>%
+        mutate(Threshold = threshold)
+    }
+    # Store the results in a dataframe
+    ProportionOfTrue <- bind_rows(ProportionOfTrue, prop_truth)
+  }
+  return(ProportionOfTrue)
 }
