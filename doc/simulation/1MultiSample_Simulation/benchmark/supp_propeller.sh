@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=supp_scSTM_Pooled_Time
+#SBATCH --job-name=supp_
 #SBATCH --output=supp_scSTM_Pooled_Time%A_%a.out
 #SBATCH --error=supp_scSTM_Pooled_Time%A_%a.err
 #SBATCH --ntasks=10
@@ -13,15 +13,15 @@
 
 module load r/4.3.1
 
-SIMS_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*/sims"
-SCSTM_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*/scSTM_Pooled_noContent_Prevalence_Time"
+S_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*/seurat"
+P_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*/propeller"
 
 # Find files that have 'sims_' in their names
-SIMS_FILES=($(find "$SIMS_DIR" -maxdepth 1 -type f -name "*/sims/*.rds"))
+S_FILES=($(find "$S_DIR" -maxdepth 1 -type f -name "*/sims/*.rds"))
 
 # Filter out files that already have a corresponding 'scSTM_' file
 FILES=()
-for SIM_FILE in $(find $SIMS_DIR -type f -name "*.rds"); do
+for SIM_FILE in $(find $S_FILES -type f -name "*.rds"); do
     # Extract the base name of the file
     BASE_NAME=$(basename "$SIM_FILE")
     
@@ -59,4 +59,5 @@ FILE="${FILES[$INDEX]}"
 PARENT_DIR=$(dirname "$(dirname "$FILE")")
 
 Rscript scSTM_Pooled_SingleResponse.R "$PARENT_DIR" "$FILE" "$SLURM_NTASKS"
+
 

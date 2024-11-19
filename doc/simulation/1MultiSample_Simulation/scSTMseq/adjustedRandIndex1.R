@@ -9,11 +9,11 @@ library(cluster)
 
 dir <- "/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse"
 # design <- "nSample20_nCellType5_noBatch_StromalCell/"
-scSTMdir <- "scSTM_Pooled_noContent_Prevalence_Time"
+scSTMdir <- "1000scSTM_Pooled_noContent_Prevalence_Time"
 # lm <-"scSTM_LinearMixed_noContent_Prevalence_Time/"
 # extract scSTM files from different design
-paths <- Sys.glob(file.path(dir, "*_noBatch_*", scSTMdir)) 
-files <- unlist(lapply(paths, list.files, full.names = TRUE))
+paths <- Sys.glob(file.path(dir, "*", scSTMdir)) 
+files <- unlist(lapply(paths, list.files, full.names = TRUE, pattern = "Null"))
 
 r.file <- paste0("R/",list.files("R/"))
 sapply(r.file, source)
@@ -112,74 +112,29 @@ write.csv(res, file = save_path)
 ##################################################################################
 ########################### plot #################################################
 ##################################################################################
-dat <- read.csv("res/1MultiSample_SingleResponse_Simulation/adjRandIndex_SingleResponse_noBatch_StromalCell_scSTM_Pooled_noContent_Prevalence_Time.csv")
+dat <- read.csv("res/1MultiSample_SingleResponse_Simulation/adjRandIndex_SingleResponse_noBatch_StromalCell_1000scSTM_Pooled_noContent_Prevalence_Time.csv")
 
 dat_long <- dat %>%
   mutate(nCellType = recode(nCellType, "5" = "5 Cell Types", "10" = "10 Cell Types",
                             "15" = "15 Cell Types")) %>%
   rename("adjRandIndex" = "pooled_scSTMseq") %>%
   gather(method, measurement, adjRandIndex:NMI, factor_key=TRUE) %>%
-  drop_na() %>%
-  group_by(nCellType, nSample, modelType, method) %>%
-  summarise(mean_measure = mean(measurement, na.rm = TRUE), .groups = "drop")
-# mutate(line_type = ifelse(grepl("scSTM", method), "solid", "dashed"))
+  drop_na()  
 
-dat_long$nCellType <- factor(dat_long$nCellType, levels = c("5 Cell Types", "10 Cell Types", "15 Cell Types"))
-dat_long$modelType <- as.numeric(sub("HighVar", "", dat_long$modelType))
-# dat_long$nSample <- factor(dat_long$nSample, levels = c("nsample3", "nsample6", "nsample12"))
-
-png("res/1MultiSample_SingleResponse_Simulation/Clustering_lineplot_SingleResponse_noBatch_StromalCell_scSTM_Pooled_noContent_Prevalence_Time.png", 
-    width = 1800, height = 1200, res = 220)
-ggplot(dat_long, aes(x = modelType, y = mean_measure, color = nCellType, group = nCellType)) +
-  # geom_line(aes(linetype = line_type), linewidth = 1.2) +
-  geom_line(linewidth = 1.2) +
+png("res/1MultiSample_SingleResponse_Simulation/Boxplot_SingleResponse_noBatch_StromalCell_1000scSTM_Pooled_noContent_Prevalence_Time.png", width = 1200, height = 800, res = 160)
+ggplot(dat_long, aes(x = method, y = measurement)) +
+  geom_boxplot(outlier.shape = NA, width = 0.7) +  # Remove outliers from the boxplot, adjust box width
+  geom_jitter(width = 0.2, size = 1, alpha = 0.6, aes(color = method)) +  # Add jittered points for data distribution
+  # facet_grid(nSample ~ nCellType) +  # Use facet_grid for a more structured layout
+  theme_minimal(base_size = 14) +  # Set a base font size for better readability
   labs(
-    x = "Effect Size",
-    y = "Mean Adjusted Rand Index",
-    title = "Mean Clustering Accuracy Across Cell Types and Effect Sizes"
-  ) +
-  facet_grid(~method) +
-  theme_bw() +
-  ylim(0, 1) +
-  theme(
-    text = element_text(size = 14),
-    legend.title = element_text(size = 15),
-    legend.text = element_text(size = 14),
-    axis.title = element_text(size = 12),
-    axis.text = element_text(size = 12),
-    plot.title = element_text(size = 14, face = "bold"),
-    plot.subtitle = element_text(size = 12, face = "italic"),
-    legend.position = "bottom",
-    legend.box = "horizontal",
-    panel.grid.major = element_line(color = "grey80"),
-    panel.grid.minor = element_blank(),
-    strip.text = element_text(size = 12, face = "bold")
-  )
-dev.off()
-
-dat_long <- dat %>%
-  mutate(nCellType = recode(nCellType, "5" = "5 Cell Types", "10" = "10 Cell Types",
-                            "15" = "15 Cell Types")) %>%
-  rename("adjRandIndex" = "pooled_scSTMseq") %>%
-  gather(method, measurement, adjRandIndex:NMI, factor_key=TRUE) %>%
-  drop_na() 
-dat_long$nCellType <- factor(dat_long$nCellType, levels = c("5 Cell Types", "10 Cell Types", "15 Cell Types"))
-dat_long$modelType <- as.numeric(sub("HighVar", "", dat_long$modelType))
-
-png("res/1MultiSample_SingleResponse_Simulation/Clustering_boxplot_SingleResponse_noBatch_StromalCell_scSTM_Pooled_noContent_Prevalence_Time.png", 
-    width = 1800, height = 1500, res = 220)
-ggplot(dat_long, aes(x = modelType, y = measurement, group = method)) +
-  geom_boxplot(outlier.shape = NA, width = 0.7) +  
-  geom_jitter(size = 1, alpha = 0.6, aes(color = method)) + 
-  facet_grid(method ~ nCellType) + 
-  labs(
-    title = "Boxplot of Clustering Accuracy Across Cell Types and Effect Sizes",
-    x = "Effect Size",
-    y = "Measurements"
+    title = "Boxplot of Clustering Accuracy",
+    x = "Methods",
+    y = "Measurement"
   ) +
   theme_bw() +
   theme(
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),  # Center and bold the title
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),  # Center and bold the title
     axis.text.x = element_text(angle = 45, hjust = 1, size = 10),  # Adjust x-axis text for better readability
     axis.text.y = element_text(size = 12),  # Adjust y-axis text size
     axis.title = element_text(size = 12),  # Increase axis title size

@@ -6,36 +6,117 @@ library(tidyverse)
 library(SingleCellExperiment)
 library(MASS)
 library(MANOVA.RM)
-dir <- "/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/nSample20_nCellType5_noBatch_StromalCell/Manualsims"
-# dir <- "/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/nSample20_nCellType10_noBatch_StromalCell/sims"
+##################################################################################
+######################## direct plot simulated data ##############################
+##################################################################################
+dir <- "/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/nSample20_nCellType5_noBatch_StromalCell/1000sims"
 files <- list.files(path = dir, pattern = "Null")
-pValue <- vector(mode = "list")
-for (file_name in files){
-  #file_name <- files[i]
-  sims <- readRDS(paste0(dir, "/", file_name))
-  
-  theta.collapsed <- colData(sims) %>%
-    as.data.frame() %>%
-    group_by(Time, Sample, Group) %>%
-    summarise(count = n(), .groups = 'drop') %>%
-    group_by(Time, Sample) %>%
-    mutate(proportion = count / sum(count)) %>%
-    ungroup() %>%
-    dplyr::select(-count) %>%
-    pivot_wider(names_from = Group, values_from = proportion, values_fill = 0)
-  
-  
-  ##### Fit Manova.RM #######
-  response_vars <- grep("^Group", colnames(theta.collapsed), value = TRUE)
-  fit <- multRM(as.formula(paste0("cbind(", paste(response_vars, collapse = ", "), ") ~ Time")),
-                data = theta.collapsed, subject = "Sample", within = "Time", iter = 1000)
-  pValue[[file_name]] <- summary(fit)[2] # extract MATS pValue
-  rm(sims)
-  cat(file_name, "\n")
-}
-saveRDS(pValue, "res/simsManual_Manova_pValue_Null_nSample20_nCellType5_noBatch_StromalCell.rds")
+file_name <- files[1]
+sims <- readRDS(paste0(dir, "/", file_name))
 
-# 
-# res <- readRDS("res/simsManual_Manova_pValue_Null_nSample20_nCellType5_noBatch_StromalCell.rds")
-# res <- as.numeric(do.call(rbind, res))
-# hist(res)
+# collapse simulate cells by their group and sample
+theta.collapsed <- colData(sims) %>%
+  as.data.frame() %>%
+  group_by(Time, Sample, Group) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(Time, Sample) %>%
+  mutate(proportion = count / sum(count)) %>%
+  ungroup() %>%
+  dplyr::select(-count) %>%
+  pivot_wider(names_from = Group, values_from = proportion, values_fill = 0)
+
+theta.collapsed %>% arrange(Sample)
+
+##### Fit Manova.RM #######
+response_vars <- grep("^Group", colnames(theta.collapsed), value = TRUE)
+as.formula(paste0("cbind(", paste(response_vars, collapse = ", "), ") ~ Time"))
+fit <- multRM(as.formula(paste0("cbind(", paste(response_vars, collapse = ", "), ") ~ Time")),
+              data = theta.collapsed, subject = "Sample", within = "Time", iter = 1000)
+summary(fit)
+saveRDS(fit, "/proj/milovelab/wu/scLDAseq/res/1MultiSample_SingleResponse_Simulation/sims1000_Manova_pValue_Null_nSample20_nCellType5_noBatch_StromalCell.rds")
+
+pValue <- readRDS("/proj/milovelab/wu/scLDAseq/res/1MultiSample_SingleResponse_Simulation/sims1000_Manova_pValue_Null_nSample20_nCellType5_noBatch_StromalCell.rds")
+pValue <- as.numeric(do.call(rbind, pValue))
+hist(pValue, main = "Distribution of MATS pValues under the Null with Simulated Data", breaks = 20)
+
+# use qqplot
+pValue <- sort(pValue)
+# Generate the theoretical quantiles for a uniform(0,1) distribution
+theoretical_quantiles <- qunif(ppoints(length(pValue)))
+
+# Create the QQ-plot
+qqplot(theoretical_quantiles, pValue, main = "QQ-Plot of P-values using direct simulations vs Uniform(0,1)",
+       xlab = "Theoretical Quantiles (Uniform(0,1))", ylab = "Sample Quantiles (P-values)")
+abline(0, 1, col = "red")  # Add a reference line
+
+##################################################################################
+################### distribution ad-hoc replicates ###############################
+##################################################################################
+pValue <- readRDS("/proj/milovelab/wu/scLDAseq/res/1MultiSample_SingleResponse_Simulation/1000ManovaTheta_Pooled_noContent_Prevalence_Time.rds")
+pValue <- pValue[grep("NullModel",names(pValue))]
+rep <- do.call(rbind, pValue)
+rep_long <- pivot_longer(rep, cols = everything(), names_to = "methods", values_to = "pValue")
+png("res/1MultiSample_SingleResponse_Simulation/1000sim_pValue_Histogram_allReplicates.png",
+    height = 1200, width = 1800, res = 220)
+ggplot(rep_long, aes(x = pValue)) +
+  geom_histogram(breaks = seq(0, 1, by = 0.05), color = "black", aes(fill = methods)) +
+  facet_wrap(~ methods) +
+  theme_minimal() +
+  labs(x = "p-value", y = "Frequency", title = "Histogram of p-values under the null across all replicates") +
+  scale_fill_manual(values = c("pValue.wts" = "skyblue", "pValue.mats" = "coral"))
+dev.off()
+
+pValue.wts <- sort(rep$pValue.wts)
+pValue.mats <- sort(rep$pValue.mats)
+theoretical_quantiles <- qunif(ppoints(length(pValue.wts)))
+
+png("res/1MultiSample_SingleResponse_Simulation/1000sim_pValue_qqplot_WTS_allReplicates.png",
+    height = 1500, width = 1500, res = 220)
+qqplot(theoretical_quantiles, pValue.wts, main = "QQ-Plot of P-values with WTS vs Uniform(0,1)",
+       xlab = "Theoretical Quantiles (Uniform(0,1))", ylab = "Sample Quantiles (P-values)")
+abline(0, 1, col = "red")  # Add a reference line
+dev.off()
+
+png("res/1MultiSample_SingleResponse_Simulation/1000sim_pValue_qqplot_MATS_allReplicates.png",
+    height = 1500, width = 1500, res = 220)
+qqplot(theoretical_quantiles, pValue.mats, main = "QQ-Plot of P-values with MATS vs Uniform(0,1)",
+       xlab = "Theoretical Quantiles (Uniform(0,1))", ylab = "Sample Quantiles (P-values)")
+abline(0, 1, col = "red")  # Add a reference line
+dev.off()
+##################################################################################
+#################### distribution ad-hoc Medium #################################
+##################################################################################
+manova.pValue <- lapply(pValue, function(x) {
+  data.frame(wts =quantile(x$pValue.wts, probs = 0.50),
+             mats = quantile(x$pValue.mats, probs = 0.50))
+})
+manova.pValue <- do.call(rbind, manova.pValue)
+manova.pValue.long <- pivot_longer(manova.pValue, cols = everything(), names_to = "methods", values_to = "pValue")
+
+png("res/1MultiSample_SingleResponse_Simulation/1000sim_pValue_Histogram_Medium.png",
+    height = 1200, width = 1800, res = 220)
+ggplot(manova.pValue.long, aes(x = pValue)) +
+  geom_histogram(breaks = seq(0, 1, by = 0.05), color = "black", aes(fill = methods)) +
+  facet_wrap(~ methods) +
+  theme_minimal() +
+  labs(x = "p-value", y = "Frequency", title = "Histogram of P-values Under the Null Across Medium of Replicates") +
+  scale_fill_manual(values = c("wts" = "skyblue", "mats" = "coral"))
+dev.off()
+
+pValue.wts.medium <- sort(manova.pValue$wts)
+pValue.mats.medium <- sort(manova.pValue$mats)
+theoretical_quantiles <- qunif(ppoints(length(pValue.wts.medium)))
+
+png("res/1MultiSample_SingleResponse_Simulation/1000sim_pValue_qqplot_WTS_Medium.png",
+    height = 1500, width = 1500, res = 220)
+qqplot(theoretical_quantiles, pValue.wts.medium, main = "QQ-Plot of P-values with WTS vs Uniform(0,1)",
+       xlab = "Uniform(0,1)", ylab = "P-Value of Medium Replicates")
+abline(0, 1, col = "red")  # Add a reference line
+dev.off()
+
+png("res/1MultiSample_SingleResponse_Simulation/1000sim_pValue_qqplot_MATS_Medium.png",
+    height = 1500, width = 1500, res = 220)
+qqplot(theoretical_quantiles, pValue.mats.medium, main = "QQ-Plot of P-values with MATS vs Uniform(0,1)",
+       xlab = "Uniform(0,1)", ylab = "P-Value of Medium Replicates")
+abline(0, 1, col = "red")  # Add a reference line
+dev.off()

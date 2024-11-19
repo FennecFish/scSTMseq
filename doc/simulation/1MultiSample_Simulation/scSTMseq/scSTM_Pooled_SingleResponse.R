@@ -18,13 +18,15 @@ library(foreach)
 args <- commandArgs(trailingOnly = TRUE)
 dir <- args[1]
 file_name <- args[2]
+design <- sub(".*/SingleResponse/([^/]+)/.*", "\\1", file_name)
+cat("Design is", design, "\n")
 file_name <- basename(file_name)
 cat("Dir is", dir, "\n")
 cat(file_name, "\n")
 gc <- as.integer(args[3])
 
 set_level <- sub("^sims_(.*)\\.rds$", "\\1", file_name)
-sims <- readRDS(paste0(dir, "/1000sims/", file_name))
+sims <- readRDS(paste0(dir, "/sims/", file_name))
 # quick qc
 sims <- quickPerCellQC(sims, filter=TRUE)
 
@@ -52,11 +54,15 @@ sourceCpp("src/STMCfuns.cpp")
 #                      max.em.its = 1, net.max.em.its = 2)
 
 scSTM.mod <- selectModel_parallel(sce = sims, sample = "Sample",
-                                  K = ngroup, prevalence = ~Time, content = NULL,
+                                  K = ngroup, prevalence = ~Time, content = ~Sample,
                                   gamma.prior = "Pooled",
                                   N = 5, ts_runs = 30, random_run = 30,
                                   max.em.its = 100, net.max.em.its = 15, gc = gc)
 
 # msg <- sprintf("Completed scLDAseq (%d seconds). \n", floor((proc.time()-t1)[3]))
-saveRDS(scSTM.mod, file = paste0(dir, "/1000scSTM_Pooled_noContent_Prevalence_Time/",
-                                 "scSTM_", set_level, ".rds"))
+dir_path <- paste0(dir, "/scSTM_Pooled_Content_Sample_Prevalence_Time/")
+if (!dir.exists(dir_path)) {
+  dir.create(dir_path, recursive = TRUE)
+}
+save_file_name <- paste0(dir_path, "scSTM_", set_level, ".rds")
+saveRDS(scSTM.mod, file = save_file_name)

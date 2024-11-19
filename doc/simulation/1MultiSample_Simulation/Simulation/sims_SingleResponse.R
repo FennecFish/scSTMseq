@@ -19,10 +19,11 @@ seed <- as.integer(Sys.time() + sim_index * runif(1, 2,10))
 set.seed(seed)
 
 # Define parameters
-batch.rmEffect = TRUE
+batch.rmEffect = FALSE
 cancerCellGroup = NULL
-# numCellType <- c(5, 10, 15)
-numCellType <- 5
+numCellType <- c(5, 10, 15)
+# numCellType <- 5
+# gamma_sd <- c(0, 0.1, 0.16, 0.23, 0.3, 0.4)
 gamma_sd <- c(0, 0.1, 0.16, 0.23, 0.3, 0.4)
 nSample <- 20
 nTimepoints <- 2
@@ -178,19 +179,23 @@ for (i in 1:nrow(param_dat)){
   
   # save_response <- paste(round(ResponseEffect, 1), collapse = ".")
   # save_time <- paste(round(TimeEffect, 1), collapse = ".")
-  saveRDS(sims, file = paste0(dir, "nSample", nSample,
-                               "_nCellType", nCellType, "_", save_batch, "_", save_cancer, "/1000sims/",
-                               "sims_", seed, "_", type, ".rds"))
+  dir_path <- paste0(dir, "nSample", nSample,
+                     "_nCellType", nCellType, "_", save_batch, "_", save_cancer, "/sims/")
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)
+  }
+  save_file_name <- paste0(dir_path, "sims_", seed, "_", type, ".rds")
+  saveRDS(sims, file = save_file_name)
   # print(proportion_check(sims))
   # print((true_param$theta$t2-true_param$theta$t1)/true_param$theta$t1)
   rm(sims)
   cat("Cell Type is", param_dat[i,1], "and the sd is", param_dat[i,2], "\n")
-  # sims <- sims[,sims$Group == "Group2"]
+  # sims <- sims[,sims$Sample == c("Sample1", "Sample2")]
   # sims <- logNormCounts(sims)
   # sims <- runPCA(sims)
-  # plotPCA(sims, colour_by = "Group", shape_by = "Sample")
-  # plotPCA(sims, colour_by = "Sample", shape_by = "Batch")
-  # plotPCA(sims, colour_by = "Group")
+  # plotPCA(sims, colour_by = "Batch", shape_by = "Sample")
+  # plotPCA(sims, colour_by = "Batch", shape_by = "Group")
+  # plotPCA(sims, colour_by = "Sample")
   
   # #############################################################
   # mean = matrix(rep(0, simplex*A), nrow = A)
