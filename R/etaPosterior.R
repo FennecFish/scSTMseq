@@ -8,7 +8,8 @@ etaPosterior <- function(model, nsims = 100){
   out <- vector("list", nrow(lambda))
   row_names <- rownames(lambda)
   for (i in seq_len(nrow(lambda))) {
-    sigma <- diag(diag(nu[[i]]))
+    # sigma <- diag(diag(nu[[i]]))
+    sigma <- nu[[i]]
     lambda_i <- lambda[i,]
     out[[i]] <- mvrnorm(nsims, mu = lambda_i, Sigma = sigma)
   }

@@ -33,7 +33,7 @@ cluster_scSTM <- function(scSTMobj) {
 }
 
 # scSTMobj <- readRDS("/work/users/e/u/euphyw/scLDAseq/data/PD1_data/PD1_scSTM/scSTM_Content_TimeandResponse_Prevalence_TimeandSample.rds")
-scSTMobj <- readRDS("data/scSTM_Content_Batch_Prevalence_TimeResponseInteraction.rds")
+scSTMobj <- readRDS("/work/users/e/u/euphyw/scLDAseq/data/PD1_data/PD1_scSTM/scSTM_Content_BatchNoInteraction_Prevalence_TimeResponseInteraction.rds")
 scSTMobj <- select_top_scSTM(scSTMobj)
 sims <- scSTMobj$settings$sce
 labelTopics(scSTMobj, topics = 7 , n = 10)
@@ -80,4 +80,6 @@ plot(time_effect, covariate = "timepoint", model = scSTMobj,
      printlegend = T, labeltype = "custom", custom.labels = paste0("topic", 1:8)) 
 legend("topright", legend = c("expansion", "non-expansion"), lwd = 2, col = c("skyblue", "orange"))
 
-labelTopics(scSTM_nC_P, 4)
+################################################################################
+################################### GSEA #######################################
+################################################################################

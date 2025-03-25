@@ -36,11 +36,12 @@ In this simulation, 1000 simulations with different seeds under the null (no cel
 ### Distribution on Simulated Cells
 We first assess distribution of p-values under the null, by fitting `MANOVA.RM` directly on the simulated cell types. By doing this step, I want to see if the data generated prior to topic modelings would follow the uniform distribution using the test.
 
-I am displaying an example dataset below, and how MANOVA is fitted on thsi dataset.
+I am displaying an example dataset below, and how MANOVA is fitted on this dataset.
 ```{r}
 dir <- "/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/nSample20_nCellType5_noBatch_StromalCell/1000sims"
 files <- list.files(path = dir, pattern = "Null")
 file_name <- files[1]
+
 sims <- readRDS(paste0(dir, "/", file_name))
 
 # collapse simulate cells by their group and sample
@@ -81,12 +82,11 @@ pValue <- pValue[grep("NullModel",names(pValue))]
 rep <- do.call(rbind, pValue)
 rep_long <- pivot_longer(rep, cols = everything(), names_to = "methods", values_to = "pValue")
 ggplot(rep_long, aes(x = pValue)) +
-  geom_histogram(bins = 20, color = "black", aes(fill = methods)) +
+  geom_histogram(breaks = seq(0, 1, by = 0.05), color = "black", aes(fill = methods)) +
   facet_wrap(~ methods) +
   theme_minimal() +
   labs(x = "p-value", y = "Frequency", title = "Histogram of p-values under the null across all replicates") +
   scale_fill_manual(values = c("pValue.wts" = "skyblue", "pValue.mats" = "coral"))
-
 ```
 
 Then we pick the medium of the pValue of 100 replicates within each simulation, and re-plot the distribution. I do not observe significant effect on the distribution due to the medium.
@@ -97,12 +97,28 @@ manova.pValue <- lapply(pValue, function(x) {
 })
 manova.pValue <- do.call(rbind, manova.pValue)
 manova.pValue.long <- pivot_longer(manova.pValue, cols = everything(), names_to = "methods", values_to = "pValue")
+
 ggplot(manova.pValue.long, aes(x = pValue)) +
-  geom_histogram(bins = 20, color = "black", aes(fill = methods)) +
+  geom_histogram(breaks = seq(0, 1, by = 0.05), color = "black", aes(fill = methods)) +
   facet_wrap(~ methods) +
   theme_minimal() +
-  labs(x = "p-value", y = "Frequency", title = "Histogram of p-values under the null using medium of replicates") +
+  labs(x = "p-value", y = "Frequency", title = "Histogram of p-values under the null across medium of replicates") +
   scale_fill_manual(values = c("wts" = "skyblue", "mats" = "coral"))
+```
+
+QQ plots can also be used to examined if distribution is uniformly distributed.
+```{r}
+pValue.wts.medium <- sort(manova.pValue$wts)
+pValue.mats.medium <- sort(manova.pValue$mats)
+theoretical_quantiles <- qunif(ppoints(length(pValue.wts.medium)))
+
+qqplot(theoretical_quantiles, pValue.wts.medium, main = "QQ-Plot of P-values with WTS vs Uniform(0,1)",
+       xlab = "Uniform(0,1)", ylab = "Medium WTS pValue")
+abline(0, 1, col = "red")  
+
+qqplot(theoretical_quantiles, pValue.mats.medium, main = "QQ-Plot of P-values with MATS vs Uniform(0,1)",
+       xlab = "Uniform(0,1)", ylab = "Medium MATS pValue")
+abline(0, 1, col = "red")  
 
 ```
 
@@ -115,11 +131,22 @@ manova.pValue <- lapply(pValue, function(x) {
 manova.pValue <- do.call(rbind, manova.pValue)
 manova.pValue.long <- pivot_longer(manova.pValue, cols = everything(), names_to = "methods", values_to = "pValue")
 ggplot(manova.pValue.long, aes(x = pValue)) +
-  geom_histogram(bins = 20, color = "black", aes(fill = methods)) +
+  geom_histogram(breaks = seq(0, 1, by = 0.05), color = "black", aes(fill = methods)) +
   facet_wrap(~ methods) +
   theme_minimal() +
-  labs(x = "p-value", y = "Frequency", title = "Histogram of p-values under the null using 75th quantile of replicates") +
+  labs(x = "p-value", y = "Frequency", title = "Histogram of p-values under the null across 75th quantile of replicates") +
   scale_fill_manual(values = c("wts" = "skyblue", "mats" = "coral"))
+pValue.wts.medium <- sort(manova.pValue$wts)
+pValue.mats.medium <- sort(manova.pValue$mats)
+theoretical_quantiles <- qunif(ppoints(length(pValue.wts.medium)))
+
+qqplot(theoretical_quantiles, pValue.wts.medium, main = "QQ-Plot of P-values with WTS vs Uniform(0,1)",
+       xlab = "Uniform(0,1)", ylab = "75th WTS pValue")
+abline(0, 1, col = "red")  
+
+qqplot(theoretical_quantiles, pValue.mats.medium, main = "QQ-Plot of P-values with MATS vs Uniform(0,1)",
+       xlab = "Uniform(0,1)", ylab = "75th MATS pValue")
+abline(0, 1, col = "red") 
 ```
 
 ### TypeI Error
@@ -146,37 +173,4 @@ ggplot(topic_plot, aes(x = Threshold, y = TypeIError, color = Methods, group = M
 
 ```
 
-<!-- ## Simulations Without Sample Variation -->
-<!-- ```{r} -->
-<!-- dir <- "/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/nSample20_nCellType5_noBatch_StromalCell/Manualsims" -->
-<!-- files <- list.files(path = dir, pattern = "Null") -->
-<!-- file_name <- files[1] -->
-<!-- sims <- readRDS(paste0(dir, "/", file_name)) -->
 
-<!-- # collapse simulate cells by their group and sample -->
-<!-- theta.collapsed <- colData(sims) %>% -->
-<!--   as.data.frame() %>% -->
-<!--   group_by(Time, Sample, Group) %>% -->
-<!--   summarise(count = n(), .groups = 'drop') %>% -->
-<!--   group_by(Time, Sample) %>% -->
-<!--   mutate(proportion = count / sum(count)) %>% -->
-<!--   ungroup() %>% -->
-<!--   dplyr::select(-count) %>% -->
-<!--   pivot_wider(names_from = Group, values_from = proportion, values_fill = 0) -->
-
-<!-- theta.collapsed %>% arrange(Sample) -->
-
-<!-- ##### Fit Manova.RM ####### -->
-<!-- response_vars <- grep("^Group", colnames(theta.collapsed), value = TRUE) -->
-<!-- as.formula(paste0("cbind(", paste(response_vars, collapse = ", "), ") ~ Time")) -->
-<!-- fit <- multRM(as.formula(paste0("cbind(", paste(response_vars, collapse = ", "), ") ~ Time")), -->
-<!--                  data = theta.collapsed, subject = "Sample", within = "Time", iter = 1000) -->
-<!-- summary(fit) -->
-<!-- ``` -->
-<!-- Since the covariance matrix is singular, we only use MATS statistics for this analysis on simulated data. We can see that the p-value under the null using `MANOVA.RM` directly on the simulated data (pre-clustering) does follow uniform distribution. -->
-
-```{r, warning=FALSE, echo=FALSE, eval=FALSE}
-pValue <- readRDS("/proj/milovelab/wu/scLDAseq/res/1MultiSample_SingleResponse_Simulation/simsManual_Manova_pValue_Null_nSample20_nCellType5_noBatch_StromalCell.rds")
-pValue <- as.numeric(do.call(rbind, pValue))
-hist(pValue, main = "Distribution of MATS pValues under the Null with Simulated Data", breaks = 20)
-```

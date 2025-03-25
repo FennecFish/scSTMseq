@@ -1,21 +1,21 @@
 #!/bin/bash
 
-#SBATCH --job-name=scSTM_pooled
-#SBATCH --output=scSTM_pooled%A_%a.out
-#SBATCH --error=scSTM_pooled%A_%a.err
+#SBATCH --job-name=STM_Batch
+#SBATCH --output=STM_Batch%A_%a.out
+#SBATCH --error=STM_Batch%A_%a.err
 #SBATCH --ntasks=10
 #SBATCH --cpus-per-task=1
-#SBATCH --time=1-
-#SBATCH --mem=100G
-#SBATCH --array=1-50
+#SBATCH --time=2-
+#SBATCH --mem=30G
+#SBATCH --array=1-95
 #SBATCH --mail-type=all
 #SBATCH --mail-user=euphyw@live.unc.edu
 
-# already run 400-500
+
 module load r/4.3.1
 
 DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/"
-FILES=($(find "$DIR" -type f -path "*_Batch_*/sims/*.rds"))
+FILES=($(find "$DIR" -type f -path "*nSample5_nCellType25_Batch*/sims/*.rds" -newermt "2024-12-04"))
 
 # Calculate the index for the SLURM array
 INDEX=$(($SLURM_ARRAY_TASK_ID - 1))

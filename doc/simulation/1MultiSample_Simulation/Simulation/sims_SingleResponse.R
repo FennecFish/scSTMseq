@@ -20,12 +20,15 @@ set.seed(seed)
 
 # Define parameters
 batch.rmEffect = FALSE
-cancerCellGroup = NULL
-numCellType <- c(5, 10, 15)
-# numCellType <- 5
-# gamma_sd <- c(0, 0.1, 0.16, 0.23, 0.3, 0.4)
-gamma_sd <- c(0, 0.1, 0.16, 0.23, 0.3, 0.4)
-nSample <- 20
+cancerCellGroup = 2
+# numCellType <- c(8,10,12)
+numCellType <- 10
+# gamma_sd <- c(0.1, 0.15, 0.3, 0.4, 0.8)
+# gamma_sd <- c(0, 0.3, 0.5, 0.8, 1, 1.5)
+gamma_sd <- 0
+# EffectSize <- c(-0.5, -0.8, -1)
+# EffectSize <- c(-0.1, -0.3, -0.5, -0.8, -1)
+nSample <- 10
 nTimepoints <- 2
 A = 1 # number of covariates, only 1 to show timeEffect
 nGenes = 3000
@@ -39,6 +42,7 @@ batch.facLoc <- rep(batch.facLoc, times =2)
 ############################## Useful Functions ################################
 ################################################################################
 generate_theta <- function(nSample, nTimepoints = 2, nCellType, mean, sd, Response = 1){
+# generate_theta <- function(nSample, nTimepoints = 2, nCellType, EffectSize, Response = 1){
   Simplex <- nCellType - 1
   # sample_ids <- rep(1:nSample, each = nTimepoints) 
   Timepoint <- rep(c(0, 1), nSample)
@@ -53,6 +57,32 @@ generate_theta <- function(nSample, nTimepoints = 2, nCellType, mean, sd, Respon
     rownames(X) <- paste(ifelse(Timepoint == 0, "t1", "t2"), sep = "_")
   }
   
+  # this maps simplex to nCEllType
+  map_to_simplx <- function(x) {
+    exp(x - log(sum(exp(x))))
+  }
+  
+  # # randomly generate a base simplex
+  # simplex_t1 <- rnorm(simplex)
+  # index <-  which(simplex_t1 == max(simplex_t1))
+  # # t2 will increase or decrease on the first cell type by effect size
+  # simplex_t2 <- simplex_t1
+  # simplex_t2[index] <- simplex_t2[index]*(1 + EffectSize)
+  # 
+  # mu <- data.frame()
+  # if(nSample > 1){
+  #   # simulate patient random effect
+  #   psi <- mvrnorm(n = nSample, mu = rep(0, Simplex),  Sigma= diag(rep(1, Simplex)))
+  #   
+  #   # adding random effect eta = mu + psi
+  #   for (i in 1:nSample) {
+  #     temp <- rbind(simplex_t1 + psi[i, ], simplex_t2 + psi[i, ])
+  #     mu <- rbind(mu, temp)
+  #   }
+  #   param <- expand.grid(paste0("Sample", 1:nSample), c("t1", "t2")) %>%
+  #     arrange(Var1, Var2)
+  #   rownames(mu) <- apply(param, 1, function(x) paste(x, collapse = "_"))
+  # }
   
   # Generate Gamma from a Normal Distribution
   # Using normal cause we only have one covariate
@@ -63,13 +93,13 @@ generate_theta <- function(nSample, nTimepoints = 2, nCellType, mean, sd, Respon
   gamma <- do.call(cbind, gamma)
   colnames(gamma) <- c(paste0("K", 1:ncol(gamma)))
   rownames(gamma) <- c("Timepoint")
-  
+
   mu <- t(t(as.matrix(gamma))  %*% t(as.matrix(X)))
-  
+
   if(nSample > 1){
     # simulate patient random effect
     psi <- mvrnorm(n = nSample, mu = rep(0, Simplex),  Sigma= diag(rep(1, Simplex)))
-    
+
     # adding random effect eta = mu + psi
     for (i in 1:nSample) {
       mu[paste0("Sample",i,"_t1"), ] <- mu[paste0("Sample",i,"_t1"), ] + psi[i, ]
@@ -81,19 +111,16 @@ generate_theta <- function(nSample, nTimepoints = 2, nCellType, mean, sd, Respon
   eta <- cbind(mu, 0)
   colnames(eta) <- paste0("K", 1:ncol(eta))
   
-  # this maps simplex to nCEllType
-  map_to_simplx <- function(x) {
-    exp(x - log(sum(exp(x))))
-  }
-  
   theta <- t(apply(eta, 1, map_to_simplx))
   theta <- list(t1 = theta[grep("t1", rownames(theta)), ], t2 = theta[grep("t2", rownames(theta)), ])
+  
+  return(list(theta = theta, index = index, psi = psi))
   # 
-  if(nSample > 1){
-    return(list(theta = theta, gamma = gamma, psi = psi))
-  }else{
-    return(list(theta = theta, gamma = gamma))
-  }
+  # if(nSample > 1){
+  #   return(list(theta = theta, gamma = gamma, psi = psi))
+  # }else{
+  #   return(list(theta = theta, gamma = gamma))
+  # }
 }
 
 # take the same baseline_proportion but varying effectSize to simulate data
@@ -154,11 +181,14 @@ sapply(r.file, source)
 
 param_dat <- expand.grid(numCellType, gamma_sd)
 colnames(param_dat) <- c("numCellType", "gamma_sd")
+# param_dat <- expand.grid(numCellType, EffectSize)
+# colnames(param_dat) <- c("numCellType", "EffectSize")
 
 # #############################################################
 for (i in 1:nrow(param_dat)){
   nCellType <- param_dat[i,1]
   gamma_sd_tmp <- param_dat[i,2]
+  # EffectSize <- param_dat[i,2]
   simplex <- nCellType- 1 
   mean = matrix(rep(0, simplex), nrow = 1)
   sd <- replicate(simplex, diag(gamma_sd_tmp, A), simplify = FALSE)
@@ -168,8 +198,12 @@ for (i in 1:nrow(param_dat)){
     type = paste0("HighVar", gamma_sd_tmp)
   }
   
+  # type = paste0("EffectSize", EffectSize)
+  
   
   true_param <- generate_theta(nSample = nSample, nTimepoints = 2, nCellType = nCellType, mean = mean, sd = sd)
+  # true_param <- generate_theta(nSample = nSample, nTimepoints = 2, nCellType = nCellType, 
+  #                             EffectSize = EffectSize)
   sims <- delta_sim(true_param = true_param, seed = seed, nSample = nSample,
                     nGenes = nGenes, nCellType = nCellType,
                     de.prob = de.prob, de.facLoc = de.facLoc,

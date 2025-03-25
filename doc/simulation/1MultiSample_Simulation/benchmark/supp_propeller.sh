@@ -1,63 +1,59 @@
 #!/bin/bash
 
-#SBATCH --job-name=supp_
-#SBATCH --output=supp_scSTM_Pooled_Time%A_%a.out
-#SBATCH --error=supp_scSTM_Pooled_Time%A_%a.err
-#SBATCH --ntasks=10
+#SBATCH --job-name=supp_propeller
+#SBATCH --output=supp_propeller%A_%a.out
+#SBATCH --error=supp_propeller%A_%a.err
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=1-
-#SBATCH --mem=70G
-#SBATCH --array=1-4
+#SBATCH --time=1:00:00
+#SBATCH --mem=6G
+#SBATCH --array=1-15
 #SBATCH --mail-type=all
 #SBATCH --mail-user=euphyw@live.unc.edu
 
 module load r/4.3.1
 
-S_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*/seurat"
-P_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*/propeller"
+S_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/MultiResponse"
 
-# Find files that have 'sims_' in their names
-S_FILES=($(find "$S_DIR" -maxdepth 1 -type f -name "*/sims/*.rds"))
+# Find all .rds files in the scSTM folder
+S_FILES=($(find "$S_DIR" -type f -path "*/seurat/*.rds"))
 
-# Filter out files that already have a corresponding 'scSTM_' file
+# Filter out files that already have a corresponding propeller file starting with 'asin_' or 'logit_'
 FILES=()
-for SIM_FILE in $(find $S_FILES -type f -name "*.rds"); do
+for SIM_FILE in "${S_FILES[@]}"; do
     # Extract the base name of the file
     BASE_NAME=$(basename "$SIM_FILE")
     
-    # Identify the corresponding scSTM directory path by substituting 'sims' with 'scSTM_Pooled_noContent_Prevalence_Time'
-    DIRECTORY=$(dirname "$SIM_FILE" | sed "s|sims|scSTM_Pooled_noContent_Prevalence_Time|")
+    # Identify the corresponding propeller directory path
+    PROP_DIR=$(dirname "$SIM_FILE" | sed "s|seurat|propeller_unpaired|")
 
-    # Construct the corresponding scSTM file name
-    SCSTM_FILE="${DIRECTORY}/${BASE_NAME/sims_/scSTM_}"
+    # Construct the potential propeller file paths for both 'asin_' and 'logit_' prefixes
+    ASIN_FILE="${PROP_DIR}/${BASE_NAME/seurat_/asin_}"
+    LOGIT_FILE="${PROP_DIR}/${BASE_NAME/seurat_/logit_}"
     
-    # Check if the corresponding scSTM file does not exist
-    if [ ! -f "$SCSTM_FILE" ]; then
+    # Check if neither of the corresponding propeller files exists
+    if [ ! -f "$ASIN_FILE" ] && [ ! -f "$LOGIT_FILE" ]; then
         FILES+=("$SIM_FILE")
     fi
 done
 
-# # Show all files in the FILES array
+# #Show all files in the FILES array
 # for FILE in "${FILES[@]}"; do
 #     echo "$FILE"
 # done
-
-# Display the count of files in the FILES array
+# 
+# # Display the count of files in the FILES array
 # echo "There are ${#FILES[@]} files in total."
 
-
-# Calculate the index for the SLURM array
 INDEX=$(($SLURM_ARRAY_TASK_ID - 1))
 
 # Get the file for the current array task
 FILE="${FILES[$INDEX]}"
 
-# # Construct the full file path
-# FILE_PATH="$SIMS_DIR/$FILE"
-
 # Extract the parent directory of the current file
 PARENT_DIR=$(dirname "$(dirname "$FILE")")
-
-Rscript scSTM_Pooled_SingleResponse.R "$PARENT_DIR" "$FILE" "$SLURM_NTASKS"
+STM_DIR="scSTM_Pooled_Content_Sample_Prevalence_Time"
+seurat_DIR="seurat"
+Rscript propeller_unpaired_MultiResponse.R "$PARENT_DIR" "$seurat_DIR" "$FILE" 
 
 

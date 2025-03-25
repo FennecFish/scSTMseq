@@ -120,3 +120,68 @@ qqplot(theoretical_quantiles, pValue.mats.medium, main = "QQ-Plot of P-values wi
        xlab = "Uniform(0,1)", ylab = "P-Value of Medium Replicates")
 abline(0, 1, col = "red")  # Add a reference line
 dev.off()
+
+check.na <- lapply(null.dat, function(x){
+  y <- is.na(x[,1])
+  return(y)
+})
+check.na <- do.call(rbind, check.na)
+table(check.na)
+null.dat.dist <- do.call(rbind, null.dat)
+manova_long <- null.dat.dist %>%
+  dplyr::select(starts_with("pValue")) %>%
+  pivot_longer(cols = starts_with("pValue"),
+               names_to = "Type",
+               values_to = "pValue") %>%
+  mutate(Type = sub("pValue\\.", "",Type))
+# manova_long <- data.frame(
+#   Value = c(null.dat.dist[,1], null.dat.dist[,2]),
+#   Type = rep(c("WTS", "MATS"), each = nrow(null.dat.dist))
+# )
+png("res/1MultiSample_SingleResponse_Simulation/Histogram_pValue_AllReplicates_SingleResponse_noBatch_StromalCell_1000scSTM_Pooled_noContent_Prevalence_Time.png", width = 1500, height = 1500, res = 220)
+ggplot(manova_long, aes(x = pValue, fill = Type)) +
+  geom_histogram(bins = 20, color = "black", aes(fill = Type)) +
+  labs(x = "p-value", y = "Frequency", title = "Histogram of p-values under the null across all replicates") +
+  scale_fill_manual(values = c("wts" = "skyblue", "mats" = "coral")) + 
+  facet_wrap(~ Type) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),  # Center and bold the title
+    axis.text.y = element_text(size = 12),  # Adjust y-axis text size
+    axis.title = element_text(size = 12),  # Increase axis title size
+    strip.text = element_text(size = 12, face = "bold"),  # Bold facet labels
+    legend.position = "none"  # Remove the legend as it's not necessary with the method labels on the x-axis
+  )
+dev.off()
+
+manova.pValue <- lapply(null.dat, function(x) {
+  data.frame(wts =quantile(x$pValue.wts, probs = 0.50),
+             mats = quantile(x$pValue.mats, probs = 0.50))
+})
+manova.pValue <- do.call(rbind, manova.pValue)
+
+manova_long <- manova.pValue %>%
+  pivot_longer(cols = everything(),
+               names_to = "Type",
+               values_to = "pValue") %>%
+  mutate(Type = sub("pValue\\.", "",Type))
+# manova_long <- data.frame(
+#   Value = c(null.dat.dist[,1], null.dat.dist[,2]),
+#   Type = rep(c("WTS", "MATS"), each = nrow(null.dat.dist))
+# )
+png("res/1MultiSample_SingleResponse_Simulation/Histogram_pValue_50thQuantile_SingleResponse_noBatch_StromalCell_1000scSTM_Pooled_noContent_Prevalence_Time.png", width = 1500, height = 1500, res = 220)
+ggplot(manova_long, aes(x = pValue, fill = Type)) +
+  geom_histogram(bins = 20, color = "black", aes(fill = Type)) +
+  labs(x = "p-value", y = "Frequency", title = "Histogram of p-values under the null using medium of replicates") +
+  scale_fill_manual(values = c("wts" = "skyblue", "mats" = "coral")) + 
+  facet_wrap(~ Type) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),  # Center and bold the title
+    axis.text.y = element_text(size = 12),  # Adjust y-axis text size
+    axis.title = element_text(size = 12),  # Increase axis title size
+    strip.text = element_text(size = 12, face = "bold"),  # Bold facet labels
+    legend.position = "none"  # Remove the legend as it's not necessary with the method labels on the x-axis
+  )
+dev.off()
+

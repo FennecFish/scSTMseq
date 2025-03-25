@@ -1,23 +1,23 @@
 #!/bin/bash
 
-#SBATCH --job-name=supp_scSTM_Pooled_Time
-#SBATCH --output=supp_scSTM_Pooled_Time%A_%a.out
-#SBATCH --error=supp_scSTM_Pooled_Time%A_%a.err
+#SBATCH --job-name=supp_scSTM
+#SBATCH --output=supp_scSTM%A_%a.out
+#SBATCH --error=supp_scSTM%A_%a.err
 #SBATCH --ntasks=10
 #SBATCH --cpus-per-task=1
 #SBATCH --time=1-
-#SBATCH --mem=70G
-#SBATCH --array=1-4
+#SBATCH --mem=35G
+#SBATCH --array=1-430
 #SBATCH --mail-type=all
 #SBATCH --mail-user=euphyw@live.unc.edu
 
 module load r/4.3.1
 
-SIMS_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*/sims"
-SCSTM_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*/scSTM_Pooled_noContent_Prevalence_Time"
+SIMS_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*_noBatch_Cancer*/sims"
+SCSTM_DIR="/work/users/e/u/euphyw/scLDAseq/data/simulation/1MultiSample/SingleResponse/*_noBatch_Cancer*/scSTM_Pooled_noContent_Prevalence_Time"
 
-# Find files that have 'sims_' in their names
-SIMS_FILES=($(find "$SIMS_DIR" -maxdepth 1 -type f -name "*/sims/*.rds"))
+# Find all .rds simulation files
+SIMS_FILES=($(find "$SIMS_DIR" -maxdepth 1 -type f -name "*.rds"))
 
 # Filter out files that already have a corresponding 'scSTM_' file
 FILES=()
@@ -58,5 +58,6 @@ FILE="${FILES[$INDEX]}"
 # Extract the parent directory of the current file
 PARENT_DIR=$(dirname "$(dirname "$FILE")")
 
-Rscript scSTM_Pooled_SingleResponse.R "$PARENT_DIR" "$FILE" "$SLURM_NTASKS"
+Rscript scSTM_Pooled_SingleResponse_noBatch.R "$PARENT_DIR" "$FILE" "$SLURM_NTASKS"
+
 

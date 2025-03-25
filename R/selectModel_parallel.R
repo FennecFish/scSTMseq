@@ -6,7 +6,7 @@ selectModel_parallel <- function(sce , K, sample = NULL,
                         net.max.em.its=5, netverbose=TRUE, M=10, N=NULL,
                         to.disk=F, control=list(), gc = 5, ...){
 
-    cl <- makeCluster(gc)
+    cl <- makeCluster(gc,outfile="")
     registerDoParallel(cl)
     on.exit(stopCluster(cl))
     # Ensure the workers source the necessary files
@@ -60,9 +60,10 @@ selectModel_parallel <- function(sce , K, sample = NULL,
     mode <- vector("character", runs)
     
     cat("Casting net \n")
+
     # Run the models in parallel
     results <- foreach(i = 1:runs, .packages = c('Rcpp'), .combine = 'rbind', .multicombine = TRUE) %dopar% {
-        tryCatch({
+      tryCatch({
             if (i <= ts_runs) {
                 init_type <- "TopicScore"
             } else if (i == ts_runs + 1) {
@@ -122,7 +123,6 @@ selectModel_parallel <- function(sce , K, sample = NULL,
             message("Completed final iteration: ", i, "\n")
             # list(runout = mod.out, bound = max(mod.out$convergence$bound))
             # 
-            # browser()
             semcoh <- semanticCoherence(mod.out, documents, M)
             if (length(mod.out$beta$logbeta) < 2) {
                 exclusivity <- exclusivity(mod.out, M = M, frexw = .7)
@@ -144,7 +144,6 @@ selectModel_parallel <- function(sce , K, sample = NULL,
         })
     }
 
-
     
     if(N == 1){
         runout <- final_results$runout
@@ -161,7 +160,6 @@ selectModel_parallel <- function(sce , K, sample = NULL,
             sparsity[[i]] <- final_results[[i]]$sparsity
         } 
     }
-
     
     out <- list(runout=runout, bound = bound, semcoh=semcoh, exclusivity=exclusivity, sparsity=sparsity)
     class(out) <- "selectModel"

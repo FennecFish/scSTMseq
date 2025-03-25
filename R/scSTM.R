@@ -416,6 +416,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
                 sigma.prior=0, enet = 0,
                 kappa.prior=c("L1", "Jeffreys"), control=list(),
                 heldout = FALSE)  {
+
   #Match Arguments and save the call
   init.type <- match.arg(init.type)
   Call <- match.call()
@@ -431,7 +432,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
     sce <- args$sce
   }
   sce <- sce[vocab,names(documents)]
-  
+
   #Documents
   if(missing(documents)) stop("Must include documents")
   if(!is.list(documents)) stop("documents must be a list, see documentation.")
@@ -442,6 +443,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   
   N <- length(documents)
   # extract number of samples
+
   if (!is.null(sample)) {
       samples <- data[sample][,1]
   } else {
@@ -450,15 +452,17 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   
   I <- length(unique(samples)) # number of patients
 
-  
+
   #Extract and Check the Word indices
   # this step somehow is very slow
   # wcountvec <- unlist(lapply(documents, function(x) rep(x[1,], times=x[2,])),use.names=FALSE)
   #to make this backward compatible we reformulate to old structure.
   # this step is also very slow
   # system.time(wcounts <- list(Group.1=sort(unique(wcountvec))))
+
   wcounts <- list(Group.1=sort(unique(unlist(lapply(documents, function(x) x[1, ])))))
   V <- length(wcounts$Group.1)  
+  
   if(!posint(wcounts$Group.1)) {
     stop("Word indices are not positive integers")
   } 
@@ -497,9 +501,11 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   
   ##
   # A Function for processing prevalence-covariate design matrices
+  
   makeTopMatrix <- function(x, data=NULL) {
     #is it a formula?
     if(inherits(x,"formula")) {
+      
       terms <- unlist(strsplit(deparse(x), "\\+"))
       fixed_effects <- terms[!grepl("\\|", terms)]
       fixed_effects <- if (length(fixed_effects) > 0) {
@@ -507,6 +513,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
       } else {
         as.formula("~ 1")  # If there are no fixed effects, return an intercept-only formula
       }
+      
       termobj <- terms(fixed_effects, data=data)
       if(attr(termobj, "response")==1) stop("Response variables should not be included in prevalence formula.")
       xmat <- try(Matrix::sparse.model.matrix(termobj,data=data),silent=TRUE)
@@ -540,7 +547,9 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   ###
   if(!is.null(prevalence)) {
     if(!is.matrix(prevalence) & !inherits(prevalence, "formula")) stop("Prevalence Covariates must be specified as a model matrix or as a formula")
+    
     xmat <- makeTopMatrix(prevalence,data)
+    
     if(is.na(nnzero(xmat))) stop("Missing values in prevalence covariates.")
   } else {
     xmat <- as.matrix(rep(1,N), ncol = 1)

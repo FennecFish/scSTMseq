@@ -10,6 +10,9 @@ library(dplyr)
 library(cowplot)
 library(mclust)
 
+r.file <- paste0("R/",list.files("R/"))
+sapply(r.file, source)
+
 select_top_scSTM <- function(scSTMobj) {
   if(class(scSTMobj) == "selectModel") {
     all_values <- unlist(scSTMobj$bound)
@@ -76,7 +79,7 @@ time_effect_ni <- estimateEffect(1:K ~ timepoint,
 #                               uncertainty = "Global")
 # saveRDS(time_effect, file = "res/PD1/effect_Interaction.rds")
 # summary(time_effect)
-=======
+
 png("res/PD1/structure_plot_BatchNoInteraction.png", height = 800, width = 1200, res = 250)
 structure_plot(scSTMobj, topics = 1:K, grouping = sims$cellType, n = 2000, gap = 20)
 dev.off()
@@ -123,19 +126,93 @@ library(xtable)
 latex_code <- xtable(dat)
 
 labelTopics(scSTMobj, topics = 7, n = 5)$topics
-# # gene_list <- labelTopics(scSTMobj, topics = 5, n = 200)
-# # gene_list <- as.vector(gene_list$topics)
-# #
-# # labelTopics(scSTMobj, topics = 1:8, n = 5)$topics
-# # gene_universe <- labelTopics(scSTMobj, topics = 5, n = length(scSTMobj$vocab))
-# # gene_universe <- as.vector(gene_universe$topics)
-# #
-# # # gene_list <- mapIds(org.Hs.eg.db,
-# # #                      keys = gene_list,
-# # #                      column = "ENTREZID",
-# # #                      keytype = "SYMBOL",
-# # #                      multiVals = "first")
-# # library(clusterProfiler)
+
+###############################################################################
+####################### Over-representation ###################################
+###############################################################################
+library(clusterProfiler)
+library("AnnotationDbi")
+library(org.Hs.eg.db)
+n = 200
+gene_int <- as.data.frame(t(labelTopics(scSTMobj, topics = 1:8, n = n)$topics))
+colnames(gene_int) <- paste0("Topic_", 1:8)
+
+gene_universe <- scSTMobj$vocab
+# gene_universe <- labelTopics(scSTMobj, topics = 1:8, n = length(scSTMobj$vocab))
+# gene_universe <- unique(as.vector(gene_universe$topics))
+
+gene_universe <- unlist(
+  mapIds(org.Hs.eg.db,
+                     keys = gene_universe,
+                     column = "ENTREZID",
+                     keytype = "SYMBOL",
+                     multiVals = "first")
+  )
+
+# total of 1915 
+# remove 64 missing value
+gene_universe <- gene_universe[!is.na(gene_universe)]
+
+gene_lookup <- tibble(GeneSymbol = names(gene_universe), ENTREZID = gene_universe)
+
+dat_long <- gene_int %>%
+  pivot_longer(cols = everything(), names_to = "Topic", values_to = "GeneSymbol")
+
+# Join with gene lookup table to replace gene symbols
+dat_replaced <- dat_long %>%
+  left_join(gene_lookup, by = "GeneSymbol") %>%
+  # mutate(GeneSymbol = ifelse(is.na(ENTREZID), GeneSymbol, ENTREZID)) %>%
+  dplyr::select(-GeneSymbol) %>%
+  pivot_wider(names_from = Topic, values_from = ENTREZID) 
+dat_replaced <- apply(dat_replaced, 2, unlist) 
+dat_replaced <- split(dat_replaced, 1:ncol(dat_replaced))
+dat_replaced <- lapply(dat_replaced, function(x){
+  y <- x[!is.na(x)]
+  return(y)
+})
+names(dat_replaced) <- paste0("Topic_", names(dat_replaced))
+# compare clusters
+ck <- compareCluster(geneCluster = dat_replaced, fun = enrichKEGG)
+ck <- setReadable(ck, OrgDb = org.Hs.eg.db, keyType="ENTREZID")
+png("res/PD1/KEGG_pathway.png", width = 4000, height = 4000, res = 400)
+dotplot(ck, x="Cluster", showCategory = 10, title = "PD1 DataSet KEGG Pathway")
+dev.off()
+
+require(ReactomePA)
+ck <- compareCluster(geneCluster = dat_replaced, fun = "enrichPathway")
+png("res/PD1/reactome_pathway.png", width = 4000, height = 6000, res = 350)
+dotplot(ck, x="Cluster", showCategory = 10, title = "PD1 DataSet Reactome Pathway")
+dev.off()
+
+ck <- compareCluster(geneCluster = dat_replaced, fun = "enrichDO")
+png("res/PD1/enrichDO_pathway.png", width = 4000, height = 6000, res = 350)
+dotplot(ck, x="Cluster", showCategory = 8)
+dev.off()
+
+ck <- compareCluster(geneCluster = dat_replaced, fun = "enrichGO", 
+                     OrgDb='org.Hs.eg.db')
+png("res/PD1/enrichGO_pathway.png", width = 4000, height = 7000, res = 300)
+dotplot(ck, x="Cluster", showCategory = 10)
+dev.off()
+# disease ontology
+# 
+# ck <- compareCluster(geneCluster = dat_replaced, fun = "enrichWP", 
+#                      organism = "human", pvalueCutoff = 0.1,
+#                      qvalueCutoff = 1, pAdjustMethod = "none")
+
+
+x <- enrichDO(gene          = dat_replaced$Topic_8,
+              ont           = "DO",
+              pvalueCutoff  = 0.05,
+              pAdjustMethod = "BH",
+              universe      = gene_lookup$ENTREZID,
+              minGSSize     = 5,
+              maxGSSize     = 500,
+              qvalueCutoff  = 0.05,
+              readable      = FALSE)
+
+wiki <- enrichWP(as.numeric(dat_replaced$Topic_8), organism = "Homo sapiens") 
+wiki@result[wiki@result$p.adjust < 0.1,]
 # # ggo <- enrichGO(gene          = gene_list,
 # #                 universe      = gene_universe,
 # #                 OrgDb         = org.Hs.eg.db,
@@ -147,4 +224,49 @@ labelTopics(scSTMobj, topics = 7, n = 5)$topics
 # #                 readable      = TRUE)
 # #
 # # goplot(ggo)
+
+
+#### KEGG
+x <- enrichKEGG(
+  gene = dat_replaced$Topic_7,
+  organism = "hsa",
+  keyType = "kegg",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  universe = gene_lookup$ENTREZID,
+  minGSSize = 10,
+  maxGSSize = 500,
+  qvalueCutoff = 0.2,
+  use_internal_data = FALSE
+)
+
+x <- enrichPathway(
+  gene = dat_replaced$Topic_7,
+  organism = "human",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  qvalueCutoff = 0.2,
+  universe =gene_lookup$ENTREZID,
+  minGSSize = 10,
+  maxGSSize = 500,
+  readable = FALSE
+)
+x@result[x@result$pvalue < 0.05,]
+
+x <- lapply(dat_replaced, function(x){
+  enrichWP(gene = x,
+           organism = "Homo sapiens",
+           universe =gene_lookup$ENTREZID,
+           pvalueCutoff = 0.05,
+           pAdjustMethod = "none",
+           qvalueCutoff = 1)
+})
+
+dotplot(x$Topic_7, color = "pvalue")
+
+x <- enrichWP(gene = dat_replaced$Topic_7,
+              organism = "Homo sapiens",
+              universe =gene_lookup$ENTREZID)
+x@result[x@result$pvalue < 0.05,]
+
 

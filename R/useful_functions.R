@@ -1,3 +1,4 @@
+# read in any RDS with catch
 safe_readRDS <- function(file_path) {
   tryCatch({
     # Attempt to read the RDS file
@@ -11,6 +12,7 @@ safe_readRDS <- function(file_path) {
   })
 }
 
+# select the top scSTM withhighest bound, and output its clusters
 process_scSTM <- function(scSTMobj) {
   if(class(scSTMobj) == "selectModel") {
     if(length(scSTMobj$bound) == 1){
@@ -33,6 +35,7 @@ process_scSTM <- function(scSTMobj) {
   names(res_cluster) <- rownames(scSTMobj$theta)
   return(res_cluster)
 }
+
 
 select_top_scSTM <- function(scSTMobj) {
   if(class(scSTMobj) == "selectModel") {
@@ -61,6 +64,7 @@ cluster_scSTM <- function(scSTMobj) {
   names(res_cluster) <- rownames(scSTMobj$theta)
   return(res_cluster)
 }
+
 
 # The following code is to map topic back to original cell types
 OneToOne_Mapping_Topics <- function(scSTMobj){

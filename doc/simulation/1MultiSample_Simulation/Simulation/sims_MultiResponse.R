@@ -19,10 +19,13 @@ seed <- as.integer(Sys.time() + sim_index * runif(1, 2,10))
 set.seed(seed)
 
 # Define parameters
-batch.rmEffect = TRUE
-cancerCellGroup = NULL
-numCellType <- c(5, 10, 15)
-gamma_sd <- c(0, 0.1, 0.3, 0.6, 1)
+batch.rmEffect = FALSE
+cancerCellGroup = 2
+# numCellType <- c(5, 10, 15)
+# gamma_sd <- c(0, 0.1, 0.16, 0.23, 0.3, 0.4)
+# nSample <- 20
+numCellType <- 5
+gamma_sd <- c(1, 2, 4)
 nSample <- 20
 nTimepoints <- 2
 
@@ -178,8 +181,13 @@ for (i in 1:nrow(param_dat)){
   
   # save_response <- paste(round(ResponseEffect, 1), collapse = ".")
   # save_time <- paste(round(TimeEffect, 1), collapse = ".")
-  saveRDS(sims, file = paste0(dir, "nSample", nSample,
-                              "_nCellType", nCellType, "_", save_batch, "_", save_cancer, "/sims/",
+  dir_path = paste0(dir, "nSample", nSample,
+                    "_nCellType", nCellType, "_", save_batch, "_", save_cancer, "/sims/")
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)
+  }
+  
+  saveRDS(sims, file = paste0(dir_path,
                               "sims_", seed, "_", type, ".rds"))
   # print(proportion_check(sims))
   # print((true_param$theta$t2-true_param$theta$t1)/true_param$theta$t1)

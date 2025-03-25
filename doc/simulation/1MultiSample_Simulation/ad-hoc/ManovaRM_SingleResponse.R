@@ -33,17 +33,19 @@ if(file.exists(scSTM_name)){
   next
 }
 
-# sims <- scSTMobj$settings$sce
-# dir_path <- paste0(dir, "/1000sims/sims_", set_level, ".rds")
-# saveRDS(sims, dir_path)
-ThetaManova <- ThetaManova(model = scSTMobj, nsims = 100)
+PosteriorRep <- PosteriorPropRep(model = scSTMobj, nsims = 100, Sample = "Sample", Time = "Time", Group = NULL)
+Manova.res <- ThetaManova(PosteriorRep, Time = "Time", Group = NULL, use_mean = F)
 
-thetaManova_dir <- sub("scSTM", "ManovaTheta", scSTM_dir)
-saveRDS(ThetaManova, file = paste0(dir, "/", thetaManova_dir, "/ManovaRM_",set_level,".rds"))
+thetaManova_dir <- "ManovaRM"
+dir_path <- paste0(dir, "/", thetaManova_dir)
+if (!dir.exists(dir_path)) {
+  dir.create(dir_path, recursive = TRUE)
+}
+saveRDS(ThetaManova, file = paste0(dir_path, "/ManovaRM_",set_level,".rds"))
 
-rm.wts <- lapply(ThetaManova$manova.fit, function(x){
+rm.wts <- lapply(Manova.res, function(x){
   # use the Manova with repeated measure for power and Type I error
-  x <- x$MANOVA.RM.res
+  x <- x$Interaction
   if(x$Warnings == "No Warnings"){
     dat <- x$resampling[1]
   }else{
@@ -52,8 +54,8 @@ rm.wts <- lapply(ThetaManova$manova.fit, function(x){
   return(dat)
 })
 
-rm.mats <- lapply(ThetaManova$manova.fit, function(x){
-  x <- x$MANOVA.RM.res
+rm.mats <- lapply(Manova.res, function(x){
+  x <- x$Interaction
   dat <- x$resampling[2]
   return(dat)
 })
@@ -64,5 +66,30 @@ dat.clean <- function(given_list){
   colnames(given_list) <- "pValue"
   return(given_list)
 }
-res <- list(rm.wts = dat.clean(rm.wts), rm.mats = dat.clean(rm.mats))
+res <- list(rm.wts = dat.clean(rm.wts), rm.mats = dat.clean(rm.mats), sce = scSTMobj$settings$sce)
 saveRDS(res, file = paste0(dir, "/", thetaManova_dir, "/Manova_pValue_",set_level,".rds"))
+
+# sims <- scSTMobj$settings$sce
+# # collapse simulate cells by their group and sample
+# theta.collapsed <- colData(sims) %>%
+#   as.data.frame() %>%
+#   group_by(Time, Sample, Group, Response) %>%
+#   summarise(count = n(), .groups = 'drop') %>%
+#   group_by(Time, Sample) %>%
+#   dplyr::mutate(proportion = count / sum(count)) %>%
+#   ungroup() %>%
+#   dplyr::select(-count) %>%
+#   pivot_wider(names_from = Group, values_from = proportion, values_fill = 0)
+# 
+# meta <- theta.collapsed %>% dplyr::select(!starts_with("Group"))
+# cluster <- theta.collapsed %>% dplyr::select(starts_with("Group"))
+# 
+# cluster <- compositions::ilr(cluster)
+# colnames(cluster) <- paste0("Group", 1:ncol(cluster))
+# data <- cbind(meta, cluster)
+# ##### Fit Manova.RM #######
+# response_vars <- grep("^Group", colnames(data), value = TRUE)
+# fit <- multRM(as.formula(paste0("cbind(", paste(response_vars, collapse = ", "), ") ~ Time")),
+#               data = data, subject = "Sample", within = "Time", iter = 1000)
+# saveRDS(fit, file = paste0(dir, "/", thetaManova_dir, "/Manova_sims_",set_level,".rds"))
+# cat("Complete SIM Manova \n")
