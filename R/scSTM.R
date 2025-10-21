@@ -1,133 +1,9 @@
-#' Variational EM for the Structural Topic Model
-#' 
-#' 
-#' Estimation of the Structural Topic Model using semi-collapsed variational
-#' EM.  The function takes sparse representation of a document-term matrix, an integer
-#' number of topics, and covariates and returns fitted model parameters.
-#' Covariates can be used in the prior for topic \code{prevalence}, in the
-#' prior for topical \code{content} or both.  See an overview of functions in
-#' the package here: \code{\link{stm-package}}
-#' 
-#' This is the main function for estimating a Structural Topic Model (STM).
-#' STM is an admixture with covariates in both mixture components.  Users
-#' provide a corpus of documents and a number of topics.  Each word in a
-#' document comes from exactly one topic and each document is represented by
-#' the proportion of its words that come from each of the K topics.  These
-#' proportions are found in the N (number of documents) by K (user specified
-#' number of topics) theta matrix.  Each of the K topics are represented as
-#' distributions over words.  The K-by-V (number of words in the vocabulary)
-#' matrix logbeta contains the natural log of the probability of seeing each
-#' word conditional on the topic.
-#' 
-#' The most important user input in parametric topic models is the number of
-#' topics.  There is no right answer to the appropriate number of topics.  More
-#' topics will give more fine-grained representations of the data at the
-#' potential cost of being less precisely estimated.  The number must be at
-#' least 2 which is equivalent to a unidimensional scaling model.  For short
-#' corpora focused on very specific subject matter (such as survey experiments)
-#' 3-10 topics is a useful starting range.  For small corpora (a few hundred to
-#' a few thousand) 5-50 topics is a good place to start.  Beyond these rough
-#' guidelines it is application specific.  Previous applications in political
-#' science with medium sized corpora (10k to 100k documents) have found 60-100
-#' topics to work well.  For larger corpora 100 topics is a useful default
-#' size.  Of course, your mileage may vary.
-#' 
-#' When \code{init.type="Spectral"} and \code{K=0} the number of topics is set
-#' using the algorithm in Lee and Mimno (2014).  See vignette for details.  We
-#' emphasize here as we do there that this does not estimate the "true" number
-#' of topics and does not necessarily have any particular statistical
-#' properties for consistently estimating the number of topics.  It can however
-#' provide a useful starting point.
-#' 
-#' The model for topical prevalence includes covariates which the analyst
-#' believes may influence the frequency with which a topic is discussed.  This
-#' is specified as a formula which can contain smooth terms using splines or by
-#' using the function \code{\link{s}}.  The response portion of the formula
-#' should be left blank.  See the examples.  These variables can include
-#' numeric and factor variables.  While including variables of class
-#' \code{Dates} or other non-numeric, non-factor types will work in \code{stm}
-#' it may not always work for downstream functions such as
-#' \code{\link{estimateEffect}}.
-#' 
-#' The topical convent covariates are those which affect the way in which a
-#' topic is discussed. As currently implemented this must be a single variable
-#' which defines a discrete partition of the dataset (each document is in one
-#' and only one group).  We may relax this in the future.  While including more
-#' covariates in topical prevalence will rarely affect the speed of the model,
-#' including additional levels of the content covariates can make the model
-#' much slower to converge.  This is due to the model operating in the much
-#' higher dimensional space of words in dictionary (which tend to be in the
-#' thousands) as opposed to topics.
-#' 
-#' In addition to the default priors for prevalence, we also make use of the
-#' \code{glmnet} package to allow for penalties between the L1 and L2 norm.  In
-#' these settings we estimate a regularization path and then select the optimal
-#' shrinkage parameter using a user-tuneable information criterion.  By default
-#' selecting the \code{L1} option will apply the L1 penalty selecting the
-#' optimal shrinkage parameter using AIC. The defaults have been specifically
-#' tuned for the STM but almost all the relevant arguments can be changed
-#' through the control structure below.  Changing the \code{gamma.enet}
-#' parameters allow the user to choose a mix between the L1 and L2 norms.  When
-#' set to 1 (as by default) this is the lasso penalty, when set to 0 its the
-#' ridge penalty.  Any value in between is a mixture called the elastic net.
-#' 
-#' The default prior choice for content covariates is now the \code{L1} option.
-#' This uses an approximation framework developed in Taddy (2013) called
-#' Distributed Multinomial Regression which utilizes a factorized poisson
-#' approximation to the multinomial.  See Roberts, Stewart and Airoldi (2014)
-#' for details on the implementation here.  This is dramatically faster than
-#' previous versions.  The old default setting which uses a Jeffreys prior is
-#' also available.
-#' 
-#' The argument \code{init.type} allows the user to specify an initialization
-#' method. The default 
-#' choice, \code{"Spectral"}, provides a deterministic initialization using the
-#' spectral algorithm given in Arora et al 2014.  See Roberts, Stewart and
-#' Tingley (2016) for details and a comparison of different approaches.
-#' Particularly when the number of documents is relatively large we highly
-#' recommend the Spectral algorithm which often performs extremely well.  Note
-#' that the random seed plays no role in the spectral initialization as it is
-#' completely deterministic (unless using the \code{K=0} or random projection
-#' settings). When the vocab is larger than 10000 terms we use only the most
-#' frequent 10000 terms in creating the initialization.  This may case the 
-#' first step of the algorithm to have a very bad value of the objective function
-#' but it should quickly stabilize into a good place.  You can tweak the exact 
-#' number where this kicks in with the \code{maxV} argument inside control. There
-#' appear to be some cases where numerical instability in the Spectral algorithm
-#' can cause differences across machines (particularly Windows machines for some reason).
-#' It should always give exactly the same answer for a given machine but if you are
-#' seeing different answers on different machines, see https://github.com/bstewart/stm/issues/133
-#' for a longer explanation.  The other option \code{"LDA"} which uses a few passes
-#' of a Gibbs sampler is perfectly reproducible across machines as long as the seed is set.
-#' 
-#' Specifying an integer greater than 1 for the argument \code{ngroups} causes
-#' the corpus to be broken into the specified number of groups.  Global updates
-#' are then computed after each group in turn.  This approach, called memoized
-#' variational inference in Hughes and Sudderth (2013), can lead to more rapid
-#' convergence when the number of documents is large.  Note that the memory
-#' requirements scale linearly with the number of groups so this provides a
-#' tradeoff between memory efficiency and speed.  The claim of speed here
-#' is based on the idea that increasing the number of global updates should
-#' help the model find a solution in fewer passes through the document set.
-#' However, it is worth noting that for any particular case the model need 
-#' not converge faster and definitely won't converge to the same location. 
-#' This functionality should be considered somewhat experimental and we encourage
-#'  users to let us know what their experiences are like here in practice.
-#' 
-#' Models can now be restarted by passing an \code{STM} object to the argument
-#' \code{model}.  This is particularly useful if you run a model to the maximum
-#' iterations and it terminates without converging.  Note that all the standard
-#' arguments still need to be passed to the object (including any formulas, the
-#' number of topics, etc.).  Be sure to change the \code{max.em.its} argument
-#' or it will simply complete one additional iteration and stop.
-#' 
-#' You can pass a custom initialization of the beta model parameters to \code{stm}.
-#'   
-#' 
+#' Variational EM for the Single Cell Structural Topic Model
+#'
 #' The \code{control} argument is a list with named components which can be
 #' used to specify numerous additional computational details.  Valid components
-#' include: 
-#' \describe{ 
+#' include:
+#' \describe{
 #' \item{\code{tau.maxit}}{Controls the maximum number of
 #' iterations when estimating the prior for content covariates.  When the mode
 #' is \code{Jeffreys}, estimation proceeds by iterating between the kappa
@@ -155,7 +31,7 @@
 #' practice estimated intercepts often push term probabilities to zero,
 #' resulting in topics that look more like those in a Dirichlet model- that is,
 #' most terms have approximately zero probability with some terms with high
-#' probability.} 
+#' probability.}
 #' \item{\code{kappa.enet}}{When using the L1 mode for content
 #' covariates this controls the elastic net mixing parameter.  See the argument
 #' \code{alpha} in \code{glmnet}.  Value must be between 1 and 0 where 1 is the
@@ -163,10 +39,10 @@
 #' parameter is to zero the less sparse the solution will tend to be.}
 #' \item{\code{gamma.enet}}{Controls the elastic net mixing parameter for the
 #' prevalence covariates.  See above for a description.}
-#' \item{\code{gamma.ic.k}}{For L1 mode prevalence covariates this controls the 
+#' \item{\code{gamma.ic.k}}{For L1 mode prevalence covariates this controls the
 #' selection of the regularization parameter.  We use a generic information criterion
-#'  which penalizes complexity by the parameter \code{ic.k}.  
-#'  When set to 2 (as by default) this results in AIC.  When set to log(n) 
+#'  which penalizes complexity by the parameter \code{ic.k}.
+#'  When set to 2 (as by default) this results in AIC.  When set to log(n)
 #'  (where n is the total number of documents in the corpus) this is equivalent to BIC.
 #'    Larger numbers will express a preference for sparser (simpler) models.}
 #' \item{\code{gamma.maxits}}{An integer indicating the maximum number of iterations
@@ -177,7 +53,7 @@
 #' relies heavily on warm starts and so a high number will often
 #' (counter-intuitively) be less costly than a low number.  We have chosen a
 #' higher default here than the default in the glmnet package and we don't
-#' recommend changing it.} 
+#' recommend changing it.}
 #' \item{\code{lambda.min.ratio}}{For L1 mode content
 #' covariates this controls the explored path of regularization values.  This
 #' defaults to .0001.  Setting higher numbers will result in more sparse
@@ -190,14 +66,14 @@
 #' the total number of words in the corpus) this is equivalent to BIC.  Larger
 #' numbers will express a preference for sparser (simpler) models.}
 #' \item{\code{nits}}{Sets the number of iterations for collapsed gibbs
-#' sampling in LDA initializations.  Defaults to 50} 
+#' sampling in LDA initializations.  Defaults to 50}
 #' \item{\code{burnin}}{Sets
 #' the burnin for collapsed gibbs sampling in LDA initializations. Defaults to
-#' 25} 
+#' 25}
 #' \item{\code{alpha}}{Sets the prevalence hyperparameter in collapsed
 #' gibbs sampling in LDA initializations.  Defaults to 50/K}
 #' \item{\code{eta}}{Sets the topic-word hyperparameter in collapsed gibbs
-#' sampling in LDA initializations.  Defaults to .01} 
+#' sampling in LDA initializations.  Defaults to .01}
 #' \item{\code{contrast}}{A
 #' logical indicating whether a standard contrast coding should be used for
 #' content covariates.  Typically this should remain at the default of FALSE.}
@@ -207,10 +83,10 @@
 #' spectral initialization.  Defaults to 3000.}
 #' \item{\code{rp.d.group.size}}{Controls the size of blocks considered at a
 #' time when computing the random projections for the spectral initialization.
-#' Defaults to 2000.} 
+#' Defaults to 2000.}
 #' \item{\code{SpectralRP}}{A logical which when
 #' \code{TRUE} turns on the experimental random projections spectral
-#' initialization.} 
+#' initialization.}
 #' \item{\code{maxV}}{For spectral initializations this will set the maximum
 #' number of words to be used in the initialization.  It uses the most frequent words
 #' first and then they are reintroduced following initialization.  This allows spectral
@@ -219,9 +95,9 @@
 #'  will solve the recovery problem in the Spectral algorithm using a downhill simplex
 #'  method.  See https://github.com/bstewart/stm/issues/133 for more discussion.}
 #' \item{\code{allow.neg.change}}{A logical indicating whether the algorithm is allowed
-#' to declare convergence when the change in the bound has become negative. 
+#' to declare convergence when the change in the bound has become negative.
 #' Defaults to \code{TRUE}.  Set to \code{FALSE} to keep the algorithm from converging
-#'  when the bound change is negative.  NB: because this is 
+#'  when the bound change is negative.  NB: because this is
 #' only an approximation to the lower-bound the change can be negative at times.  Right
 #' now this triggers convergence but the final approximate bound might go higher if you
 #' are willing to wait it out. The logic of the default setting is that a negative change
@@ -244,8 +120,8 @@
 #' parameter.  This defaults to 30 and can throw an error when too high.  \code{stm} will automatically lower
 #' the parameter for you until it works, but it can also be directly set here.}
 #' }
-#' 
-#' 
+#'
+#'
 #' @param documents The document term matrix to be modeled. These can be supplied
 #' in the native \pkg{stm} format, a sparse term count matrix with one row
 #' per document and one column per term, or a
@@ -256,7 +132,7 @@
 #' as an integer matrix with two rows, and columns equal to the number of unique
 #' vocabulary words in the document.  The first row contains the 1-indexed
 #' vocabulary entry and the second row contains the number of times that term
-#' appears. This is similar to the format in the \code{\link[lda]{lda}} package 
+#' appears. This is similar to the format in the \code{\link[lda]{lda}} package
 #' except that (following R convention) the vocabulary is indexed from one. Corpora
 #' can be imported using the reader function and manipulated using the
 #' \code{\link{prepDocuments}}.  Raw texts can be ingested using
@@ -287,7 +163,7 @@
 #' @param data an optional data frame containing the prevalence and/or content
 #' covariates.  If unspecified the variables are taken from the active
 #' environment.
-#' @param init.type The method of initialization, by default the spectral initialization.  
+#' @param init.type The method of initialization, by default the spectral initialization.
 #' Must be either Latent
 #' Dirichlet Allocation ("LDA"), "Random", "Spectral" or "Custom".  See details for more
 #' info. If you want to replicate a previous result, see the argument
@@ -298,10 +174,10 @@
 #' attempting to reproduce a result with that seed, it should be specified
 #' here.
 #' @param max.em.its The maximum number of EM iterations.  If convergence has
-#' not been met at this point, a message will be printed.  If you set this to 
+#' not been met at this point, a message will be printed.  If you set this to
 #' 0 it will return the initialization.
 #' @param emtol Convergence tolerance.  EM stops when the relative change in
-#' the approximate bound drops below this level.  Defaults to .00001.  You 
+#' the approximate bound drops below this level.  Defaults to .00001.  You
 #' can set it to 0 to have the algorithm run \code{max.em.its} number of steps.
 #' See advanced options under \code{control} for more options.
 #' @param verbose A logical flag indicating whether information should be
@@ -325,8 +201,8 @@
 #' distributions with a topic-level pooled variance which is given a moderately
 #' regularizing half-cauchy(1,1) prior.  The alternative \code{L1} uses
 #' \code{glmnet} to estimate a grouped penalty between L1-L2.  If your code is running
-#' slowly immediately after "Completed E-Step" appears, you may want to switch to the 
-#' \code{L1} option. See details below.  
+#' slowly immediately after "Completed E-Step" appears, you may want to switch to the
+#' \code{L1} option. See details below.
 #' @param sigma.prior a scalar between 0 and 1 which defaults to 0.  This sets
 #' the strength of regularization towards a diagonalized covariance matrix.
 #' Setting the value above 0 can be useful if topics are becoming too highly
@@ -337,82 +213,82 @@
 #' included for backwards compatibility. See details for more information on
 #' computation.
 #' @param control a list of additional advanced parameters. See details.
-#' 
-#' @return An object of class STM 
-#' 
-#' \item{mu}{The corpus mean of topic prevalence and coefficients} 
-#' \item{sigma}{Covariance matrix} 
+#'
+#' @return An object of class STM
+#'
+#' \item{mu}{The corpus mean of topic prevalence and coefficients}
+#' \item{sigma}{Covariance matrix}
 #' \item{beta}{List containing the log of the word probabilities for each topic.}
 #' \item{settings}{The settings file. The Seed object will always contain the
-#' seed which can be fed as an argument to recover the model.} 
-#' \item{vocab}{The vocabulary vector used.} 
+#' seed which can be fed as an argument to recover the model.}
+#' \item{vocab}{The vocabulary vector used.}
 #' \item{convergence}{list of convergence elements including the value of the approximate bound on the marginal
-#' likelihood at each step.} 
-#' \item{theta}{Number of Documents by Number of Topics matrix of topic proportions.} 
+#' likelihood at each step.}
+#' \item{theta}{Number of Documents by Number of Topics matrix of topic proportions.}
 #' \item{eta}{Matrix of means for the variational distribution of the multivariate normal latent variables used to
-#' calculate theta.} 
+#' calculate theta.}
 #' \item{invsigma}{The inverse of the sigma matrix.}
-#' \item{time}{The time elapsed in seconds} 
+#' \item{time}{The time elapsed in seconds}
 #' \item{version}{The version number
 #' of the package with which the model was estimated.}
-#' 
+#'
 #' @seealso \code{\link{prepDocuments}} \code{\link{labelTopics}}
 #' \code{\link{estimateEffect}}
-#' @references 
+#' @references
 #' Roberts, M., Stewart, B., Tingley, D., and Airoldi, E. (2013)
 #' "The structural topic model and applied social science." In Advances in
 #' Neural Information Processing Systems Workshop on Topic Models: Computation,
-#' Application, and Evaluation. 
-#' 
+#' Application, and Evaluation.
+#'
 #' Roberts M., Stewart, B. and Airoldi, E. (2016) "A model of text for
 #' experimentation in the social sciences" Journal of the American Statistical
 #' Association.
-#' 
+#'
 #' Roberts, M., Stewart, B., Tingley, D., Lucas, C., Leder-Luis, J., Gadarian,
 #' S., Albertson, B., et al. (2014). Structural topic models for open ended
 #' survey responses. American Journal of Political Science, 58(4), 1064-1082.
-#' 
+#'
 #' Roberts, M., Stewart, B., & Tingley, D. (2016). "Navigating the Local
 #' Modes of Big Data: The Case of Topic Models. In Data Analytics in Social
 #' Science, Government, and Industry." New York: Cambridge University Press.
 #' @examples
-#' 
+#'
 #' \donttest{
-#' 
-#' #An example using the Gadarian data.  From Raw text to fitted model using 
+#'
+#' #An example using the Gadarian data.  From Raw text to fitted model using
 #' #textProcessor() which leverages the tm Package
 #' temp<-textProcessor(documents=gadarian$open.ended.response,metadata=gadarian)
 #' out <- prepDocuments(temp$documents, temp$vocab, temp$meta)
 #' set.seed(02138)
-#' mod.out <- stm(out$documents, out$vocab, 3, 
+#' mod.out <- stm(out$documents, out$vocab, 3,
 #'                prevalence=~treatment + s(pid_rep), data=out$meta)
-#' 
+#'
 #' #The same example using quanteda instead of tm via textProcessor()
 #' #Note this example works with quanteda version 0.9.9-31 and later
 #' require(quanteda)
 #' gadarian_corpus <- corpus(gadarian, text_field = "open.ended.response")
-#' gadarian_dfm <- dfm(gadarian_corpus, 
+#' gadarian_dfm <- dfm(gadarian_corpus,
 #'                      remove = stopwords("english"),
 #'                      stem = TRUE)
 #' stm_from_dfm <- stm(gadarian_dfm, K = 3, prevalence = ~treatment + s(pid_rep),
 #'                     data = docvars(gadarian_corpus))
-#'                      
+#'
 #' #An example of restarting a model
-#' mod.out <- stm(out$documents, out$vocab, 3, prevalence=~treatment + s(pid_rep), 
+#' mod.out <- stm(out$documents, out$vocab, 3, prevalence=~treatment + s(pid_rep),
 #'                data=out$meta, max.em.its=5)
-#' mod.out2 <- stm(out$documents, out$vocab, 3, prevalence=~treatment + s(pid_rep), 
+#' mod.out2 <- stm(out$documents, out$vocab, 3, prevalence=~treatment + s(pid_rep),
 #'                 data=out$meta, model=mod.out, max.em.its=10)
 #' }
 #' @export
 scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
-                prevalence=NULL, content=NULL, 
+                prevalence=NULL, content=NULL,
                 sample = NULL, # specify sample ID column name
                 init.type=c("Spectral", "Random", "Custom", "TopicScore"), seed=NULL,
                 max.em.its=100, emtol=1e-5,
                 verbose=TRUE, reportevery=5,
                 LDAbeta=TRUE, interactions=TRUE,
                 ngroups=1, model=NULL,
-                gamma.prior=c("Pooled", "L1", "LinearRegression", "LinearMixed"), 
+                gamma.prior=c("Pooled", "L1", "LinearRegression", "LinearMixed"),
                 sigma.prior=0, enet = 0,
                 kappa.prior=c("L1", "Jeffreys"), control=list(),
                 heldout = FALSE)  {
@@ -440,7 +316,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   if(any(unlist(lapply(documents, function(x) anyDuplicated(x[1,]))))) {
     stop("Duplicate term indices within a document.  See documentation for proper format.")
   }
-  
+
   N <- length(documents)
   # extract number of samples
 
@@ -449,7 +325,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   } else {
           samples <- rep("sample_1", N)
   }
-  
+
   I <- length(unique(samples)) # number of patients
 
 
@@ -461,14 +337,14 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   # system.time(wcounts <- list(Group.1=sort(unique(wcountvec))))
 
   wcounts <- list(Group.1=sort(unique(unlist(lapply(documents, function(x) x[1, ])))))
-  V <- length(wcounts$Group.1)  
-  
+  V <- length(wcounts$Group.1)
+
   if(!posint(wcounts$Group.1)) {
     stop("Word indices are not positive integers")
-  } 
+  }
   if(!isTRUE(all.equal(wcounts$Group.1,1:V))) {
     stop("Word indices must be sequential integers starting with 1.")
-  } 
+  }
   #note we only do the tabulation after making sure it will actually work.
   # wcounts$x <- tabulate(wcountvec)
   # wcounts$x <- as.vector(rowSums(assay(sce)))
@@ -480,11 +356,11 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   # } else {
   #     wcounts$x <- as.vector(rowSums(assay(sce)))
   # }
-  # 
-  
+  #
+
   #Check the Vocab vector against the observed word indices
   if(length(vocab)!=V) stop("Vocab length does not match observed word indices")
-  
+
   #Check the Number of Topics
   if(missing(K)) stop("K, the number of topics, is required.")
   if(K!=0) {
@@ -498,14 +374,14 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   #Iterations, Verbose etc.
   if(!(length(max.em.its)==1 & nonnegint(max.em.its))) stop("Max EM iterations must be a single non-negative integer")
   if(!is.logical(verbose)) stop("verbose must be a logical.")
-  
+
   ##
   # A Function for processing prevalence-covariate design matrices
-  
+
   makeTopMatrix <- function(x, data=NULL) {
     #is it a formula?
     if(inherits(x,"formula")) {
-      
+
       terms <- unlist(strsplit(deparse(x), "\\+"))
       fixed_effects <- terms[!grepl("\\|", terms)]
       fixed_effects <- if (length(fixed_effects) > 0) {
@@ -513,7 +389,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
       } else {
         as.formula("~ 1")  # If there are no fixed effects, return an intercept-only formula
       }
-      
+
       termobj <- terms(fixed_effects, data=data)
       if(attr(termobj, "response")==1) stop("Response variables should not be included in prevalence formula.")
       xmat <- try(Matrix::sparse.model.matrix(termobj,data=data),silent=TRUE)
@@ -526,9 +402,9 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
                  Try a simpler formula.")
         }
         xmat <- Matrix::Matrix(xmat)
-        
+
       }
-      propSparse <- 1 - Matrix::nnzero(xmat)/length(xmat) 
+      propSparse <- 1 - Matrix::nnzero(xmat)/length(xmat)
       #if its less than 50% sparse or there are fewer than 50 columns, just convert to a standard matrix
       if(propSparse < .5 | ncol(xmat) < 50) {
         xmat <- as.matrix(xmat)
@@ -537,7 +413,7 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
     }
     if(is.matrix(x)) {
       #Does it have an intercept in first column?
-      if(isTRUE(all.equal(x[,1],rep(1,nrow(x))))) return(Matrix::Matrix(x)) 
+      if(isTRUE(all.equal(x[,1],rep(1,nrow(x))))) return(Matrix::Matrix(x))
       else return(cbind(1,Matrix::Matrix(x)))
     }
   }
@@ -547,9 +423,9 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   ###
   if(!is.null(prevalence)) {
     if(!is.matrix(prevalence) & !inherits(prevalence, "formula")) stop("Prevalence Covariates must be specified as a model matrix or as a formula")
-    
+
     xmat <- makeTopMatrix(prevalence,data)
-    
+
     if(is.na(nnzero(xmat))) stop("Missing values in prevalence covariates.")
   } else {
     xmat <- as.matrix(rep(1,N), ncol = 1)
@@ -577,41 +453,41 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
     yvarlevels <- NULL
     betaindex <- rep(1, length(documents))
   }
-  
+
   A <- length(unique(betaindex)) #define the number of aspects
-  
+
   #Checks for Dimension agreement
   ny <- length(betaindex)
   nx <- ifelse(is.null(xmat), N, nrow(xmat))
   if(N!=nx | N!=ny) stop(paste("number of observations in content covariate (",ny,
                                ") prevalence covariate (",
                                nx,") and documents (",N,") are not all equal.",sep=""))
-  
+
   #Some additional sanity checks
   if(!is.logical(LDAbeta)) stop("LDAbeta must be logical")
   if(!is.logical(interactions)) stop("Interactions variable must be logical")
   if(sigma.prior < 0 | sigma.prior > 1) stop("sigma.prior must be between 0 and 1")
   if(!is.null(model)) {
-    if(max.em.its <= model$convergence$its) stop("when restarting a model, max.em.its represents the total iterations of the model 
+    if(max.em.its <= model$convergence$its) stop("when restarting a model, max.em.its represents the total iterations of the model
                                                  and thus must be greater than the length of the original run")
   }
   ###
   # Now Construct the Settings File
   ###
-  settings <- list(dim=list(K=K, A=A, 
-                            V=V, N=N, I = I, 
-                            wcounts=wcounts, 
+  settings <- list(dim=list(K=K, A=A,
+                            V=V, N=N, I = I,
+                            wcounts=wcounts,
                             samples = samples),
                    verbose=verbose,
                    topicreportevery=reportevery,
-                   convergence=list(max.em.its=max.em.its, em.converge.thresh=emtol, 
+                   convergence=list(max.em.its=max.em.its, em.converge.thresh=emtol,
                                     allow.neg.change=TRUE),
                    covariates=list(X=xmat, betaindex=betaindex, yvarlevels=yvarlevels, formula=prevalence),
                    gamma=list(mode=match.arg(gamma.prior), prior=NULL, enet=enet, ic.k=2,
                    # gamma=list(mode=gamma.prior, prior=NULL, enet=1, ic.k=2,
                               maxits=1000),
                    sigma=list(prior=sigma.prior),
-                   kappa=list(LDAbeta=LDAbeta, interactions=interactions, 
+                   kappa=list(LDAbeta=LDAbeta, interactions=interactions,
                               fixedintercept=TRUE, mstep=list(tol=.001, maxit=3),
                               contrast=FALSE),
                    tau=list(mode=match.arg(kappa.prior), tol=1e-5,
@@ -620,14 +496,14 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
                             maxit=1e5),
                    init=list(mode=init.type, nits=50, burnin=25, alpha=(50/K), eta=.01,
                              s=.05, p=3000, d.group.size=2000, recoverEG=TRUE,
-                             tSNE_init.dims=50, tSNE_perplexity=30), 
+                             tSNE_init.dims=50, tSNE_perplexity=30),
                    seed=seed,
                    sce = sce,
                    ngroups=ngroups)
   if(init.type=="Spectral" & V > 10000) {
     settings$init$maxV <- 10000
   }
-  
+
   if(settings$gamma$mode=="L1") {
     #if(!require(glmnet) | !require(Matrix)) stop("To use L1 penalization please install glmnet and Matrix")
     if(ncol(xmat)<=2) stop("Cannot use L1 penalization in prevalence model with 2 or fewer covariates.")
@@ -636,26 +512,26 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
   ###
   # Fill in some implied arguments.
   ###
-  
+
   #Is there a covariate on top?
   # if(is.null(prevalence)) {
   #   settings$gamma$mode <- "CTM" #without covariates has to be estimating the mean.
-  # } 
-  
+  # }
+
   #Is there a covariate on the bottom?
   if(is.null(content)) {
     settings$kappa$interactions <- FALSE #can't have interactions without a covariate.
   } else {
-    settings$kappa$LDAbeta <- FALSE #can't do LDA topics with a covariate 
+    settings$kappa$LDAbeta <- FALSE #can't do LDA topics with a covariate
   }
-  
+
   ###
   # process arguments in control
   ###
-  
+
   #Full List of legal extra arguments
-  legalargs <-  c("tau.maxit", "tau.tol", 
-                  "fixedintercept","kappa.mstepmaxit", "kappa.msteptol", 
+  legalargs <-  c("tau.maxit", "tau.tol",
+                  "fixedintercept","kappa.mstepmaxit", "kappa.msteptol",
                   "kappa.enet", "nlambda", "lambda.min.ratio", "ic.k", "gamma.enet",
                   "gamma.ic.k",
                   "nits", "burnin", "alpha", "eta", "contrast",
@@ -673,8 +549,8 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
       if(i=="tau.tol") settings$tau$tol <- control[[i]]
       if(i=="fixedintercept")settings$kappa$fixedintercept <- control[[i]]
       if(i=="kappa.enet") settings$tau$enet <- control[[i]]
-      if(i=="kappa.mstepmaxit") settings$kappa$mstep$maxit <- control[[i]] 
-      if(i=="kappa.msteptol") settings$kappa$mstep$tol <- control[[i]] 
+      if(i=="kappa.mstepmaxit") settings$kappa$mstep$maxit <- control[[i]]
+      if(i=="kappa.msteptol") settings$kappa$mstep$tol <- control[[i]]
       if(i=="nlambda") settings$tau$nlambda <- control[[i]]
       if(i=="lambda.min.ratio") settings$tau$lambda.min.ratio <- control[[i]]
       if(i=="ic.k") settings$tau$ic.k <- control[[i]]
@@ -707,20 +583,20 @@ scSTMseq <- function(sce, K, documents=NULL, vocab=NULL, data = NULL,
       }
     }
   }
-  
+
   ###
   # Process the Seed
   ###
   if(is.null(settings$seed)) {
     #if there is no seed, choose one and set it, recording for later
-    seed <- floor(runif(1)*1e7) 
+    seed <- floor(runif(1)*1e7)
     set.seed(seed)
     settings$seed <- seed
   } else {
     #otherwise just use the provided seed.
     set.seed(settings$seed)
   }
-  
+
   settings$call <- Call
   ###
   # Finally run the actual model

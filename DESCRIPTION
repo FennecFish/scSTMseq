@@ -30,6 +30,10 @@ Imports:
     stats,
     withr,
     splatter,
-    fastTopics
+    fastTopics,
+    parallel
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Suggests: 
+    testthat
+Config/testthat/edition: 3

@@ -38,7 +38,8 @@ SimPairedData <- function(
     gamma_sd_set = c(0, 0.3),
     A = 1,
     cancerCellGroup = 2,
-    batch.rmEffect = FALSE
+    batch.rmEffect = FALSE,
+    output_dir = NULL
 ) {
   batchCells <- rep(c(nCell, nCell), each = nSample)
   batch.facLoc <- runif(nSample, min = 0, max = 0.5)
@@ -71,14 +72,14 @@ SimPairedData <- function(
       cancerCellGroup = cancerCellGroup, batch.rmEffect = batch.rmEffect
     )
 
-    dir_path <- file.path(output_dir, paste0("nSample", nSample,
+    if(!is.null(output_dir)) {
+      dir_path <- file.path(output_dir, paste0("nSample", nSample,
                                              "_nCellType", nCellType, "_", save_batch, "_", save_cancer, "sims"))
     if (!dir.exists(dir_path)) dir.create(dir_path, recursive = TRUE)
-
     saveRDS(sims, file = file.path(dir_path, paste0("sims_", seed, "_", type, ".rds")))
-    rm(sims)
-
+    }
     message("Generated simulation with ", nCellType, " cell types and gamma SD = ", gamma_sd_tmp)
+    return(sims)
   }
 }
 
@@ -132,7 +133,7 @@ generate_theta <- function(nSample, nTimepoints = 2, nCellType, mean, sd){
 delta_sim <- function(true_param, seed, nSample, nGenes, nCellType,
                       de.prob, de.facLoc, batchCells, batch.facLoc,
                       cancerCellGroup = NULL, batch.rmEffect = TRUE) {
-  params <- newSTMParams()
+  params <- newSplatParams()
   params <- setParams(params, nGenes = nGenes,
                       group.prob = true_param$theta,
                       de.prob = de.prob, de.facLoc = de.facLoc,

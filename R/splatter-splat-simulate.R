@@ -1,3 +1,11 @@
+#' Simulate single-cell data using Splatter revised function
+#'
+#' @description Wrapper around revised splatter::splatSimulate to generate synthetic
+#' single-cell data for testing or examples.
+#'
+#' @param ... Arguments passed to [splatter::splatSimulate()].
+#' @return A [SingleCellExperiment] object.
+#' @export
 splatSimulate <- function(params = newSplatParams(),
                           method = c("single", "groups", "paths"),
                           sparsify = TRUE, verbose = TRUE,

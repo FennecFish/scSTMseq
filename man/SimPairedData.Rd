@@ -16,7 +16,8 @@ SimPairedData(
   gamma_sd_set = c(0, 0.3),
   A = 1,
   cancerCellGroup = 2,
-  batch.rmEffect = FALSE
+  batch.rmEffect = FALSE,
+  output_dir = NULL
 )
 }
 \arguments{

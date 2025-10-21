@@ -1,13 +1,71 @@
+#' Structure plot of topic proportions for scSTM / STM models
+#'
+#' Draws a “structure plot” (stacked bar chart) of per-cell (document) topic
+#' proportions \eqn{\theta}, optionally grouped and subsampled for speed. Topics
+#' can be reordered, and colors chosen automatically or supplied manually.
+#'
+#' @param scSTMobj An object produced by your modeling function
+#'   (class \code{"scSTM"} or \code{"STM"}). Only the fields
+#'   \code{$theta}, \code{$settings$dim$N}, \code{$settings$dim$K}, and
+#'   \code{$DocName} are accessed.
+#' @param topics Topics to display and order. Can be a numeric index vector
+#'   into columns of \code{scSTMobj$theta} or a character vector of column
+#'   names. If missing, topics are ordered by increasing column means.
+#' @param grouping Optional factor of length \code{nrow(theta)} giving group
+#'   membership per cell/document. If missing, all cells are treated as a
+#'   single group.
+#' @param n Integer; if \code{n < N}, randomly subsample \code{n} rows for
+#'   plotting (useful for very large objects). Default \code{2000}.
+#' @param colors Character vector of hex colors, at least one per topic, in the
+#'   order of \code{topics}. If missing, a qualitative palette is chosen
+#'   automatically.
+#' @param gap Integer number of blank slots inserted between adjacent groups on
+#'   the x-axis. Default \code{1}.
+#' @param embed_method (Currently unused placeholder) a function to compute a
+#'   1D embedding for within-group ordering. Kept for API compatibility.
+#' @param ggplot_call A function that receives the prepared data frame and
+#'   returns a ggplot object. The default is \code{structure_plot_ggplot_call()}.
+#' @param ... Passed to \code{ggplot_call}.
+#'
+#' @return A \pkg{ggplot2} object: a stacked bar chart with one bar per cell
+#'   (or subsampled cell), colored by topic. If \code{grouping} has > 1 level,
+#'   group gaps and x-axis ticks are added.
+#'
+#' @section Notes:
+#' The function accepts either \code{"scSTM"} or \code{"STM"} objects. It uses
+#' \code{inherits(scSTMobj, c("scSTM","STM"))} so downstream code that expects
+#' an STM-like object remains compatible.
+#'
+#' @examples
+#' \dontrun{
+#' # Suppose `fit` is the result of your modeling function:
+#' # class(fit) <- c("scSTM","STM")
+#' p <- structure_plot(fit, n = 500)
+#' print(p)
+#'
+#' # With grouping:
+#' grp <- factor(sample(c("T0","T1"), nrow(fit$theta), replace = TRUE))
+#' p2 <- structure_plot(fit, grouping = grp)
+#' }
+#'
+#' @seealso \code{\link[ggplot2]{ggplot}}, \code{\link[cowplot]{theme_cowplot}}
+#' @importFrom stats rnorm
+#' @importFrom utils head
+#' @importFrom ggplot2 ggplot aes_string geom_col scale_x_continuous
+#'   scale_color_manual scale_fill_manual labs theme element_blank
+#'   element_text
+#' @importFrom cowplot theme_cowplot
+#' @export
 structure_plot <-
-  function (scSTMobj, topics, grouping, # loadings_order = "embed", 
+  function (scSTMobj, topics, grouping, # loadings_order = "embed",
             n = 2000,
             colors, gap = 1,
             embed_method = structure_plot_default_embed_method,
             ggplot_call = structure_plot_ggplot_call, ...) {
-    
+
       # check to see scSTMobj is correct
-      if(!class(scSTMobj) == "STM") stop("Input \"scSTMobj\" should be an output from \"scSTMseq\".")
-           
+      if(!class(scSTMobj) == "scSTMseq") stop("Input \"scSTMobj\" should be an output from \"scSTMseq\".")
+
       #
       n0 <- scSTMobj$settings$dim$N # number of doc/cell
       k <- scSTMobj$settings$dim$K
@@ -38,7 +96,7 @@ structure_plot <-
         colors <- colors9
       else if (k < 22)
         colors <- kelly()[-1]
-      else      
+      else
         colors <- glasbey()[-1]
     }
 
@@ -54,7 +112,7 @@ structure_plot <-
         theta <- theta[rows,]
         grouping <- grouping[rows,drop = FALSE]
     }
-   
+
     # The ordering of the rows is not provided, so determine an
     # ordering by computing a 1-d embedding of L.
     if (nlevels(grouping) == 1) {
@@ -70,7 +128,7 @@ structure_plot <-
             loadings_order <- c(loadings_order,i[order(y)])
         }
     }
-   
+
     # Prepare the data for plotting and create the structure plot.
     theta <- theta[loadings_order,]
     grouping <- grouping[loadings_order,drop = TRUE]
@@ -84,22 +142,8 @@ structure_plot <-
   }
 
 #' @rdname structure_plot
-#'
 #' @importFrom stats rnorm
-#' 
 #' @export
-#' 
-# structure_plot_default_embed_method <- function (fit,...) {
-#     
-#   if (nrow(fit) < 20)
-#     return(rnorm(nrow(fit)))
-#   else {
-#     d <- dim(fit$L)
-#     message(sprintf("Running tsne on %s x %s matrix.",d[1],d[2]))
-#     return(drop(suppressMessages(tsne_from_topics(fit,dims = 1,...))))
-#   }
-# }
-
 structure_plot_ggplot_call <- function (dat, colors, ticks = NULL,
                                         font.size = 9)
   ggplot(dat,aes_string(x = "sample",y = "prop",color = "topic",
@@ -122,6 +166,8 @@ structure_plot_ggplot_call <- function (dat, colors, ticks = NULL,
 # three columns: "sample", a row of L (numeric); "topic", a topic
 # (factor); and "prop", the topic proportion for the given sample
 # (numeric).
+#' @export
+#' @method compile structure
 compile_structure_plot_data <- function (L, topics) {
 
   n <- nrow(L)
@@ -143,6 +189,8 @@ compile_structure_plot_data <- function (L, topics) {
 # vector) should already ordered by the groups; that is, grouping =
 # sort(grouping). Finally, a "gap" is added to the sample indices in
 # each group to provide a visual spacing of the groups.
+#' @export
+#' @method compile grouped_structure
 compile_grouped_structure_plot_data <- function (L, topics, grouping,
                                                  gap = 0) {
 

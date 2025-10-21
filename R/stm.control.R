@@ -17,12 +17,12 @@ stm.control <- function(documents, vocab, settings, model=NULL) {
                            Random = "Beginning Random Initialization \n",
                            Custom = "Beginning Custom Initialization \n"))
     #initialize
-    
+
     model <- stm.init(documents, settings) # see STMinit.R
     #if we were using the Lee and Mimno method of setting K, update the settings
     if(settings$dim$K==0) settings$dim$K <- nrow(model$beta[[1]])
     #unpack
-    
+
     mu <- list(mu=model$mu)
     sigma <- model$sigma
     beta <- list(beta=model$beta)
@@ -80,7 +80,7 @@ stm.control <- function(documents, vocab, settings, model=NULL) {
     stopits <- TRUE
     if(verbose) cat("Returning Initialization.")
   }
- 
+
   ############
   #Step 2: Run EM
   ############
@@ -109,10 +109,10 @@ stm.control <- function(documents, vocab, settings, model=NULL) {
           pi <- suffstats$pi
           omega <- suffstats$omega
       }
-     
+
       # trace.ss <- suffstats$trace
       # new_bound.ss <- suffstats$new_bound
-      
+
       #do the m-step
 
       mu <- opt.mu(lambda=lambda, pi = pi,
@@ -127,13 +127,13 @@ stm.control <- function(documents, vocab, settings, model=NULL) {
       # y <- calcNormFactors(y, method="upperquartile")
       # y <- estimateGLMCommonDisp(y)
       # y <- estimateGLMTagwiseDisp(y)
-      # 
+      #
       # fit <- glmFit(y)
       # res <- residuals(fit, type="deviance")
       # set4 <- RUVr(set, rownames(sce_aggregated), k=1, res)
       # pi <- matrix(rep(pData(set4)[,1], K-1), nrow = I)
 
-      
+
       if(!is.null(pi)){
           sigs <- opt.sigs(pi, omega, samples)
           alpha <- pi
@@ -174,12 +174,12 @@ stm.control <- function(documents, vocab, settings, model=NULL) {
       #   FALSE  # Indicates an error occurred
       # })
       # # ARI <- append(ARI, adjustedRandIndex(res_cluster, true_group))
-      
+
     # bound <- llh.bound(bound.ss, alpha, sigs, omega, phi)
     bound <- sum(bound.ss)
     # trace <- sum(trace.ss)
     # new_bound <- sum(new_bound.ss)
-    # 
+    #
     cat("calculate log likelihood \n")
     # cat("bound \n")
     convergence <- convergence.check(bound, convergence, settings)
@@ -207,18 +207,18 @@ stm.control <- function(documents, vocab, settings, model=NULL) {
       sigs <- NULL
   }
 
-  model <- list(mu=mu, sigma=sigma, beta=beta, 
+  model <- list(mu=mu, sigma=sigma, beta=beta,
                 psi = list(alpha = alpha, sigs = sigs), settings=settings,
-                vocab=vocab, DocName = names(documents), 
+                vocab=vocab, DocName = names(documents),
                 sampleID = samples, convergence=convergence,
                 theta=exp(lambda - log(rowSums(exp(lambda)))),
                 eta=lambda[,-ncol(lambda), drop=FALSE],
                 nu = nu,
                 # ARI = ARI,
-                time=time, 
-                version=utils::packageDescription("stm")$Version)
+                time=time,
+                version=utils::packageDescription("scSTMseq")$Version)
 
-  class(model) <- "STM"
+  class(model) <- c("scSTMseq", "STM")
   return(model)
 }
 

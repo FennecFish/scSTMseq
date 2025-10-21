@@ -1,5 +1,5 @@
 estimateEffect <- function(formula,
-                           stmobj, ref.vec = NULL,# metadata=NULL, 
+                           stmobj, ref.vec = NULL,# metadata=NULL,
                            sampleNames = NULL, sampleIDs = NULL, # if id = null, then combine all samples
                            uncertainty=c("Global", "Local", "None"), documents=NULL,
                            nsims=25, prior=NULL) {
@@ -15,13 +15,13 @@ estimateEffect <- function(formula,
   #   documents <- args$documents
   #   metadata <- args$data
   # }
-  
+
   ##
   #Step 1: Extract the formula and do some error checking
   ##
   if(!inherits(formula,"formula")) stop("formula must be a formula object.")
   if(!is.null(metadata) & !is.data.frame(metadata)) metadata <- as.data.frame(metadata)
-  
+
   if (!is.null(ref.vec)) {
       # Extract the covariate terms from the formula
       covariate_terms <- strsplit(as.character(formula)[3], "\\s*\\*\\s*")[[1]]
@@ -46,7 +46,7 @@ estimateEffect <- function(formula,
     # into:  c("~", "dv", "iv")
     response <- as.character(formula)[2] #second object is the response in this cases
     K <- eval(parse(text=response))
-    if(!(posint(K) && max(K)<=stmobj$settings$dim$K)) stop("Topics specified as response in formula must be a set of positive integers equal to or less than the number of topics in the model.")   
+    if(!(posint(K) && max(K)<=stmobj$settings$dim$K)) stop("Topics specified as response in formula must be a set of positive integers equal to or less than the number of topics in the model.")
     #now we reconstruct the formula removing the response
     formula <- formula(paste(as.character(formula)[c(1,3)], collapse = " "))
     #the above used to be the below code but the use got deprecated.
@@ -55,15 +55,15 @@ estimateEffect <- function(formula,
   } else {
     K <- 1:stmobj$settings$dim$K
   }
-  
+
   # now we subset the metadata to include only sample specified
   if(!is.null(sampleIDs)) {
     if(is.null(sampleNames)) stop("Please specify the colname name for sampleIDs in the input metadata")
     if(!sampleIDs %in% stmobj$sampleID) stop("Sample ids specified must be exactly the same as the ones used in the model")
     metadata = metadata[metadata[,sampleNames] == sampleIDs,]
     subDocName <- stmobj$DocName[stmobj$sampleID %in% sampleIDs]
-    stmobj <- STMsubset(stmobj, subDocName) 
-  } 
+    stmobj <- STMsubset(stmobj, subDocName)
+  }
   mf <- model.frame(termobj, data=metadata)
   xmat <- model.matrix(termobj,data=metadata)
   varlist <- all.vars(termobj)
@@ -84,12 +84,12 @@ estimateEffect <- function(formula,
   #Step 2: Compute the QR decomposition
   ##
   # all the models here are essentially just OLS regressions
-  # becuase we will run them many times we want to cache the 
+  # becuase we will run them many times we want to cache the
   # expensive components in advance.
   if(!is.null(prior)) {
     if(!is.matrix(prior)) {
       prior <- diag(prior, nrow=ncol(xmat))
-    } 
+    }
     if(ncol(prior)!=ncol(xmat)) stop("number of columns in prior does not match columns in design matrix")
     prior.pseudo <- chol(prior)
     xmat <- rbind(xmat,prior.pseudo)
@@ -103,7 +103,7 @@ estimateEffect <- function(formula,
     warning("Covariate matrix is singular.  See the details of ?estimateEffect() for some common causes.
              Adding a small prior 1e-5 for numerical stability.")
   }
-  ##  
+  ##
   #Step 3: Calculate Coefficients
   ##
   pb <- txtProgressBar(min = 0, max = nsims, style = 3)
@@ -123,7 +123,7 @@ estimateEffect <- function(formula,
       #lm.mod <- lm(thetasims[,k]~ xmat -1)
       #storage[[which(k==K)]][[i]] <- list(coef=coef(lm.mod),vcov=vcov(lm.mod))
       lm.mod <- qr.lm(thetasims[,k], qx)
-      storage[[which(k==K)]][[i]] <- summary.qr.lm(lm.mod)      
+      storage[[which(k==K)]][[i]] <- summary.qr.lm(lm.mod)
     }
     setTxtProgressBar(pb, i)
   }
@@ -144,6 +144,8 @@ estimateEffect <- function(formula,
 # A function for performing simple linear regression with a cached QR decomposition
 # this should be lighter weight than lm().  Works with summary.qr.lm() to give
 # vcov calculations etc.
+#' @export
+#' @method simple linear
 qr.lm <- function(y, qx) {
   if(length(y)!=nrow(qx$qr)) {
     #probably don't match because of a prior
@@ -155,27 +157,29 @@ qr.lm <- function(y, qx) {
   residuals <- qr.resid(qx,y)
   fitted.values <- qr.fitted(qx,y)
   df.residual <- length(fitted.values) - qx$rank
-  out <- list(coefficients=beta, residuals=residuals, 
-              fitted.values=fitted.values, 
+  out <- list(coefficients=beta, residuals=residuals,
+              fitted.values=fitted.values,
               df.residual=df.residual, rank=qx$rank, qr=qx)
-  out 
+  out
 }
 #this function rewrites the summary.lm() function
 # to calculate from our reduced regression
+#' @export
+#' @method summary lm
 summary.qr.lm <- function (object) {
   z <- object
   p <- z$rank
   rdf <- z$df.residual
-  
+
   Qr <- object$qr
   n <- nrow(Qr$qr)
   p1 <- 1L:p
   r <- z$residuals
   f <- z$fitted.values
-  
-  mss <- ifelse(attr(z$terms, "intercept"), sum((f - mean(f))^2), sum(f^2)) 
+
+  mss <- ifelse(attr(z$terms, "intercept"), sum((f - mean(f))^2), sum(f^2))
   rss <- sum(r^2)
-  
+
   resvar <- rss/rdf
   R <- chol2inv(Qr$qr[p1, p1, drop = FALSE])
   se <- sqrt(diag(R) * resvar)
@@ -193,7 +197,7 @@ summary.qr.lm <- function (object) {
 #'regression tables that look like typically summaries you see in R.  In general
 #'we recommend that you use non-linearities such as splines via function like
 #'\code{\link{s}} and in those circumstances the tables are not particularly
-#'interpretable.  
+#'interpretable.
 #'
 #'Confidence intervals are calculated by using draws from the covariance matrix
 #'of each simulation to estimate the standard error.  Then a t-distribution approximation
@@ -208,7 +212,7 @@ summary.qr.lm <- function (object) {
 #'@param ... further arguments passed to or from other methods
 #'
 #'@seealso \code{\link{estimateEffect}} \code{\link{plot.estimateEffect}}
-#'@method summary estimateEffect  
+#'@method summary estimateEffect
 #'@aliases summary.estimateEffect print.summary.estimateEffect
 #'@export
 summary.estimateEffect <- function(object, topics=NULL, nsim=500, ...) {
@@ -226,9 +230,9 @@ summary.estimateEffect <- function(object, topics=NULL, nsim=500, ...) {
     tval <- est/se
     rdf <- nrow(object$data) - length(est)
     p <- 2 * stats::pt(abs(tval), rdf, lower.tail = FALSE)
-    
+
     coefficients <- cbind(est, se, tval, p)
-    rownames(coefficients) <- attr(object$parameters[[1]][[1]]$est, "names") 
+    rownames(coefficients) <- attr(object$parameters[[1]][[1]]$est, "names")
     colnames(coefficients) <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
     tables[[i]] <- coefficients
   }
@@ -237,18 +241,18 @@ summary.estimateEffect <- function(object, topics=NULL, nsim=500, ...) {
   return(out)
 }
 
-#'@method print summary.estimateEffect  
+#'@method print summary.estimateEffect
 #'@export
-print.summary.estimateEffect <- function(x, digits = max(3L, getOption("digits") - 3L), 
+print.summary.estimateEffect <- function(x, digits = max(3L, getOption("digits") - 3L),
                                          signif.stars = getOption("show.signif.stars"), ...) {
-  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
-  
+
   for(i in 1:length(x$tables)) {
     cat(sprintf("\nTopic %i:\n", x$topics[i]))
     cat("\nCoefficients:\n")
     coefs <- x$tables[[i]]
-    stats::printCoefmat(coefs, digits = digits, signif.stars = signif.stars, 
+    stats::printCoefmat(coefs, digits = digits, signif.stars = signif.stars,
                         na.print = "NA", ...)
     cat("\n")
   }
